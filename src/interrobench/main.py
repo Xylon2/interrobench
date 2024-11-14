@@ -1,9 +1,14 @@
 import yaml
+import inspect
 from functools import reduce
+
+# other modules
+import interrogees
+from shared import prompt_continue
+
+# providers
 from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
-
-from langchain_core.messages import HumanMessage, SystemMessage
 
 def load_config(filepath):
     with open(filepath, "r") as file:
@@ -11,10 +16,22 @@ def load_config(filepath):
 
     return config
 
-messages = [
-    SystemMessage(content="Translate the following from English into Italian"),
-    HumanMessage(content="hi!"),
-]
+def rfn(config, score, mystery_fn):
+    name = mystery_fn["name"]
+    function = mystery_fn["function"]
+    verifications = mystery_fn["verifications"]
+
+    print("Interrogating function", name)
+    prompt_continue(config, "prompt-each-interrogation")
+
+    # run the interrogation
+
+    # run the verification
+    
+    if True:
+        return score + 1
+    else:
+        return score + 1
 
 def main():
     config = load_config("resources/config.yaml") | load_config("resources/credentials.yaml")
@@ -28,7 +45,7 @@ def main():
         case "anthropic":
             model = ChatAnthropic(model=model["name"], api_key=api_keys["anthropic"])
 
-    print(model.invoke(messages))
+    print("Final score:", reduce(lambda a, b: rfn(config, a, b), interrogees.functions, 0))
 
 if __name__ == "__main__":
     main()
