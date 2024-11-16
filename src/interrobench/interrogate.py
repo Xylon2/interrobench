@@ -26,7 +26,7 @@ Once you are confident you know what the function does, you will inform the user
 I would like you to test my function using the provided tool until you think you know what it does, then tell me."""),
 ]
 
-def interrogate(config, llm, mystery_fn):
+def interrogate(config, llm, mystery_fn, msgfmt):
     msg_limit = config["msg-limit"]
     debug = config["debug"]
 
@@ -37,23 +37,23 @@ def interrogate(config, llm, mystery_fn):
     messages = list(initial_messages)  # python by default would just alias the
                                        # new variable to the old one so we use
                                        # list() to force a copy
+
     for count in range(0, msg_limit):
         # send the chat
         llmout = llm.invoke(messages)
 
         # append for convo history
-        messages.append(llmout)
+        messages.append(llmout)  # it's an AIMessage object
 
         llm_msg = llmout.content
         tool_calls = llmout.tool_calls  # list of dicts
-        finish_reason = llmout.response_metadata["finish_reason"]
 
-        print(llm_msg)
-        print("TOOL CALLS")
-        print(tool_calls)
+        print(msgfmt(llm_msg))
+#        print("TOOL CALLS")
+#        print(tool_calls)
         
         # if it called the tool
-        if finish_reason == "tool_calls":
+        if tool_calls:
             for tool_call in tool_calls:
                 messages.append(fn_fn.invoke(tool_call))
 
@@ -66,9 +66,9 @@ def interrogate(config, llm, mystery_fn):
             if tool_call_count == 0:
                 raise NoToolException("LLM didn't use it's tool.")
             
-            print("The tool was used", tool_call_count, "times.")
+            print("\nThe tool was used", tool_call_count, "times.\n")
 
-            return()
+            return(messages)
 
     # LLM ran out of messages
     raise MsgLimitException("LLM ran out of messages.")

@@ -1,10 +1,12 @@
 import yaml
 from functools import reduce
+from toolz.dicttoolz import update_in
 
 # other modules
-from interrogees import interrogees
+from interrogees import interrogees_
 from shared import prompt_continue
 from interrogate import interrogate
+from verify import verify
 
 # providers
 from langchain_openai import ChatOpenAI
@@ -16,27 +18,27 @@ def load_config(filepath):
 
     return config
 
-def rfn(config, llm, score, mystery_fn):
+
+def rfn(config, llm, msgfmt, acc, mystery_fn):
     name = mystery_fn["name"]
     function = mystery_fn["function"]
     verifications = mystery_fn["verifications"]
 
-    print("Interrogating function", name)
     prompt_continue(config, "prompt-each-interrogation")
+    print("--- INTERROGATING FUNCTION", name, "---")
 
     llm_wo_tool = llm
     llm_w_tool = llm.bind_tools([function])
 
     # run the interrogation
-    interrogate(config, llm_w_tool, mystery_fn)
+    messages = interrogate(config, llm_w_tool, mystery_fn, msgfmt)
 
+    print("--- VERIFYING FUNCTION", name, "---")
     # run the verification
-    print("verification stub")
-    
-    if True:
-        return score + 1
+    if verify(config, llm_wo_tool, messages, verifications, mystery_fn):
+        return update_in(acc, ["score"], lambda n: n + 1)
     else:
-        return score + 1
+        return update_in(acc, ["wrong"], lambda xs: xs + [name])
 
 def main():
     config = load_config("resources/config.yaml") | load_config("resources/credentials.yaml")
@@ -47,10 +49,15 @@ def main():
     match model["provider"]:
         case "openai":
             llm = ChatOpenAI(model=model["name"], api_key=api_keys["openai"])
+            msgfmt = lambda x: x
         case "anthropic":
             llm = ChatAnthropic(model=model["name"], api_key=api_keys["anthropic"])
+            msgfmt = lambda x: x["text"]
 
-    print("Final score:", reduce(lambda a, b: rfn(config, llm, a, b), interrogees, 0))
+    test_results = reduce(lambda a, b: rfn(config, llm, msgfmt, a, b), interrogees_, {"score": 0, "wrong": []})
+            
+    print("Final score:", test_results["score"])
+    print("Wrong answers:", test_results["wrong"])
 
 if __name__ == "__main__":
     main()

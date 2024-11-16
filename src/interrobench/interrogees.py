@@ -4,6 +4,25 @@ Each also has a set of verifications which the system will use to check the LLM 
 """
 
 from langchain.tools import tool
+from string import ascii_lowercase
+from toolz.dicttoolz import update_in
+
+def list_to_alphabet_map(lst):
+    """
+    Maps a list to a dictionary with keys as sequential lowercase letters.
+    
+    :param lst: List of values to map
+    :return: Dictionary with letters as keys
+    """
+
+    # Ensure the list is not longer than the available letters
+    if len(lst) > len(ascii_lowercase):
+        raise ValueError("List is too long to map to alphabetic letters.")
+
+    return dict(zip(ascii_lowercase, lst))
+
+def map_alphabet(xs):
+    return [list_to_alphabet_map(x) for x in xs]
 
 interrogees = []
 
@@ -115,7 +134,7 @@ def integer_division(a: int, b: int) -> str:
 
 interrogees.append({"name": "integer division",
                     "function": integer_division,
-                    "verifications": [[1, 2], [4, 5], [-1, 1], [0, 0]]})
+                    "verifications": [[1, 2], [4, 5], [45, 16]]})
 
 @tool("test_function")
 def remainder(a: int, b: int) -> str:
@@ -124,4 +143,8 @@ def remainder(a: int, b: int) -> str:
 
 interrogees.append({"name": "remainder",
                     "function": remainder,
-                    "verifications": [[1, 2], [4, 5], [-1, 1], [0, 0]]})
+                    "verifications": [[1, 2], [4, 5], [45, 16], [13, 13]]})
+
+
+# make it look the way langchain likes it
+interrogees_ = [update_in(m, ["verifications"], map_alphabet) for m in interrogees]
