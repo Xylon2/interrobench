@@ -14,6 +14,7 @@ from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
 from langchain_google_vertexai import ChatVertexAI
 from langchain_xai import ChatXAI
+from langchain_groq import ChatGroq
 
 def load_config(filepath):
     with open(filepath, "r") as file:
@@ -67,6 +68,9 @@ def main():
             msgfmt = lambda x: x
         case "xai":
             llm = ChatXAI(model=model["name"], xai_api_key=api_keys["xai"])
+            msgfmt = lambda x: x
+        case "groq":
+            llm = ChatGroq(model=model["name"], api_key=api_keys["groq"])
             msgfmt = lambda x: x
 
     test_results = reduce(lambda a, b: rfn(config, llm, msgfmt, a, b), interrogees_, {"score": 0, "wrong": []})
