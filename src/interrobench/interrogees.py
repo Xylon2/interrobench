@@ -34,7 +34,7 @@ def and_fn(a: bool, b: bool) -> bool:
 
 interrogees.append({"name": "and",
                     "function": and_fn,
-                    "verifications": [[True, True], [True, False], [False, True], [False, False]]})
+                    "verifications": [[True, True], [True, False], [False, False]]})
 
 @tool("test_function")
 def or_fn(a: bool, b: bool) -> bool:
@@ -43,7 +43,7 @@ def or_fn(a: bool, b: bool) -> bool:
 
 interrogees.append({"name": "or",
                     "function": or_fn,
-                    "verifications": [[True, True], [True, False], [False, True], [False, False]]})
+                    "verifications": [[True, True], [True, False], [False, False]]})
 
 @tool("test_function")
 def nand(a: bool, b: bool) -> bool:
@@ -52,7 +52,7 @@ def nand(a: bool, b: bool) -> bool:
 
 interrogees.append({"name": "nand",
                     "function": nand,
-                    "verifications": [[True, True], [True, False], [False, True], [False, False]]})
+                    "verifications": [[True, True], [True, False], [False, False]]})
 
 @tool("test_function")
 def xor(a: bool, b: bool) -> bool:
@@ -107,7 +107,7 @@ def addition(a: int, b: int, c: int) -> int:
 
 interrogees.append({"name": "addition",
                     "function": addition,
-                    "verifications": [[1, 2, 3], [4, 5, 6], [-1, 1, 0], [0, 0, 0]]})
+                    "verifications": [[1, 2, 3], [4, 5, 6], [0, 0, 0]]})
 
 @tool("test_function")
 def subtraction(a: int, b: int) -> int:
@@ -116,7 +116,7 @@ def subtraction(a: int, b: int) -> int:
 
 interrogees.append({"name": "subtraction",
                     "function": subtraction,
-                    "verifications": [[1, 2], [4, 5], [-1, 1], [0, 0]]})
+                    "verifications": [[10, 2], [7, 5], [1, 0]]})
 
 @tool("test_function")
 def multiplication(a: int, b: int) -> int:
@@ -125,7 +125,7 @@ def multiplication(a: int, b: int) -> int:
 
 interrogees.append({"name": "multiplication",
                     "function": multiplication,
-                    "verifications": [[1, 2], [4, 5], [-1, 1], [0, 0]]})
+                    "verifications": [[3, 2], [4, 5], [0, 9]]})
 
 @tool("test_function")
 def integer_division(a: int, b: int) -> str:
@@ -143,8 +143,98 @@ def remainder(a: int, b: int) -> str:
 
 interrogees.append({"name": "remainder",
                     "function": remainder,
-                    "verifications": [[1, 2], [4, 5], [45, 16], [13, 13]]})
+                    "verifications": [[3, 2], [45, 16], [13, 13]]})
 
+@tool("test_function")
+def add_and_subtract(a: int, b: int, c: int) -> str:
+    """Use this tool to test the mystery function."""
+    return a + b - c
+
+interrogees.append({"name": "add and subtract",
+                    "function": add_and_subtract,
+                    "verifications": [[5, 2, 3], [4, 5, 9], [25, 15, 1]]})
+
+@tool("test_function")
+def multiply_and_add(a: int, b: int, c: int) -> str:
+    """Use this tool to test the mystery function."""
+    return a * b + c
+
+interrogees.append({"name": "multiply and add",
+                    "function": multiply_and_add,
+                    "verifications": [[1, 2, 7], [4, 5, 3], [3, 9, 8]]})
+
+@tool("test_function")
+def subtract_and_divide(a: int, b: int, c: int) -> str:
+    """Use this tool to test the mystery function."""
+    return "Undefined" if c == 0 else (a - b) // c
+
+interrogees.append({"name": "subtract and divide",
+                    "function": subtract_and_divide,
+                    "verifications": [[10, 2, 2], [35, 16, 4], [13, 3, 5]]})
+
+# string manipulations
+@tool("test_function")
+def concatenate(a: str, b: str) -> str:
+    """Use this tool to test the mystery function."""
+    return a + b
+
+interrogees.append({"name": "concatenate",
+                    "function": concatenate,
+                    "verifications": [["hello", "world"], ["foo", "bar"], ["abc", "123"]]})
+
+@tool("test_function")
+def reverse_string(a: str) -> str:
+    """Use this tool to test the mystery function."""
+    return a[::-1]
+
+interrogees.append({"name": "reverse string",
+                    "function": reverse_string,
+                    "verifications": [["hello"], ["world"], ["abcde"]]})
+
+@tool("test_function")
+def uppercase_string(a: str) -> str:
+    """Use this tool to test the mystery function."""
+    return a.upper()
+
+interrogees.append({"name": "uppercase string",
+                    "function": uppercase_string,
+                    "verifications": [["hello"], ["world"], ["abc"]]})
+
+@tool("test_function")
+def lowercase_string(a: str) -> str:
+    """Use this tool to test the mystery function."""
+    return a.lower()
+
+interrogees.append({"name": "lowercase string",
+                    "function": lowercase_string,
+                    "verifications": [["HELLO"], ["WORLD"], ["ABC"]]})
+
+@tool("test_function")
+def string_length(a: str) -> int:
+    """Use this tool to test the mystery function."""
+    return len(a)
+
+interrogees.append({"name": "string length",
+                    "function": string_length,
+                    "verifications": [["hello"], ["world"], ["abcdefg"]]})
+
+@tool("test_function")
+def contains_substring(a: str, b: str) -> bool:
+    """Use this tool to test the mystery function."""
+    return b in a
+
+interrogees.append({"name": "contains substring",
+                    "function": contains_substring,
+                    "verifications": [["hello world", "world"], ["foobar", "bar"], ["abc", "d"]]})
+
+@tool("test_function")
+def repeat_string(a: str, b: int) -> str:
+    """Use this tool to test the mystery function."""
+    return a * b
+
+interrogees.append({"name": "repeat string",
+                    "function": repeat_string,
+                    "verifications": [["hello", 3], ["abc", 5]]})
 
 # make it look the way langchain likes it
 interrogees_ = [update_in(m, ["verifications"], map_alphabet) for m in interrogees]
