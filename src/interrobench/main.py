@@ -1,10 +1,10 @@
 import yaml
-import inspect
 from functools import reduce
 
 # other modules
-import interrogees
+from interrogees import interrogees
 from shared import prompt_continue
+from interrogate import interrogate
 
 # providers
 from langchain_openai import ChatOpenAI
@@ -16,7 +16,7 @@ def load_config(filepath):
 
     return config
 
-def rfn(config, score, mystery_fn):
+def rfn(config, llm, score, mystery_fn):
     name = mystery_fn["name"]
     function = mystery_fn["function"]
     verifications = mystery_fn["verifications"]
@@ -24,9 +24,14 @@ def rfn(config, score, mystery_fn):
     print("Interrogating function", name)
     prompt_continue(config, "prompt-each-interrogation")
 
+    llm_wo_tool = llm
+    llm_w_tool = llm.bind_tools([function])
+
     # run the interrogation
+    interrogate(config, llm_w_tool, mystery_fn)
 
     # run the verification
+    print("verification stub")
     
     if True:
         return score + 1
@@ -41,11 +46,11 @@ def main():
     # prepare the appropriate runnable
     match model["provider"]:
         case "openai":
-            model = ChatOpenAI(model=model["name"], api_key=api_keys["openai"])
+            llm = ChatOpenAI(model=model["name"], api_key=api_keys["openai"])
         case "anthropic":
-            model = ChatAnthropic(model=model["name"], api_key=api_keys["anthropic"])
+            llm = ChatAnthropic(model=model["name"], api_key=api_keys["anthropic"])
 
-    print("Final score:", reduce(lambda a, b: rfn(config, a, b), interrogees.functions, 0))
+    print("Final score:", reduce(lambda a, b: rfn(config, llm, a, b), interrogees, 0))
 
 if __name__ == "__main__":
     main()
