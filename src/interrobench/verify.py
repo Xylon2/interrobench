@@ -1,5 +1,5 @@
 from pprint import pprint
-from shared import prompt_continue
+from shared import prompt_continue, indented_print
 
 from typing_extensions import Annotated, TypedDict
 from itertools import tee
@@ -44,16 +44,20 @@ def verify(config, llm, messages, verifications, mystery_fn):
         #print("in:", in_)
         #print("out:", out)
 
-        print(map_to_multiline_string(in_))
+        print("\n### SYSTEM: inputs:")
+        indented_print(map_to_multiline_string(in_))
 
         # amnesia between tests is fine
         llmout = llm_.invoke(messages + [prompt_maker(in_)])
-        print(llmout["thoughts"], "\n")
+        print("\n--- LLM ---")
+        indented_print(llmout["thoughts"], "\n")
 
         prompt_continue(config, "prompt-each-message")
 
-        if llmout["expected_output"] != out:
-            print("WRONG")
+        if llmout["expected_output"] == out:
+            print("\n### SYSTEM: CORRECT")
+        else:
+            print("\n### SYSTEM: WRONG")
             return False
 
     # if we got here all tests passed

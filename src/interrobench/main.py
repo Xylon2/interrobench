@@ -25,7 +25,7 @@ def rfn(config, llm, msgfmt, acc, mystery_fn):
     verifications = mystery_fn["verifications"]
 
     prompt_continue(config, "prompt-each-interrogation")
-    print("--- INTERROGATING FUNCTION", name, "---")
+    print("\n### SYSTEM: interrogating function", name)
 
     llm_wo_tool = llm
     llm_w_tool = llm.bind_tools([function])
@@ -33,7 +33,7 @@ def rfn(config, llm, msgfmt, acc, mystery_fn):
     # run the interrogation
     messages = interrogate(config, llm_w_tool, mystery_fn, msgfmt)
 
-    print("--- VERIFYING FUNCTION", name, "---")
+    print("\n### SYSTEM: verifying function", name)
     # run the verification
     if verify(config, llm_wo_tool, messages, verifications, mystery_fn):
         return update_in(acc, ["score"], lambda n: n + 1)

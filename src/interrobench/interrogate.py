@@ -1,5 +1,5 @@
 from pprint import pprint
-from shared import prompt_continue
+from shared import prompt_continue, indented_print
 
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.prompts import ChatPromptTemplate
@@ -26,6 +26,9 @@ Once you are confident you know what the function does, you will inform the user
 I would like you to test my function using the provided tool until you think you know what it does, then tell me."""),
 ]
 
+def print_tool_call(tool_call, result):
+    indented_print(", ".join(map(str, tool_call["args"].values())), "→", result.content)
+
 def interrogate(config, llm, mystery_fn, msgfmt):
     msg_limit = config["msg-limit"]
     debug = config["debug"]
@@ -48,14 +51,18 @@ def interrogate(config, llm, mystery_fn, msgfmt):
         llm_msg = llmout.content
         tool_calls = llmout.tool_calls  # list of dicts
 
-        print(msgfmt(llm_msg))
-#        print("TOOL CALLS")
-#        print(tool_calls)
+        print("\n--- LLM ---")
+        indented_print(msgfmt(llm_msg))
         
         # if it called the tool
         if tool_calls:
+            print("\n### SYSTEM: calling tool")
             for tool_call in tool_calls:
-                messages.append(fn_fn.invoke(tool_call))
+                call_result = fn_fn.invoke(tool_call)
+
+                print_tool_call(tool_call, call_result)
+                
+                messages.append(call_result)
 
                 tool_call_count += 1
 
@@ -66,7 +73,7 @@ def interrogate(config, llm, mystery_fn, msgfmt):
             if tool_call_count == 0:
                 raise NoToolException("LLM didn't use it's tool.")
             
-            print("\nThe tool was used", tool_call_count, "times.\n")
+            print("\n### SYSTEM: The tool was used", tool_call_count, "times.")
 
             return(messages)
 
