@@ -51,6 +51,8 @@ def verify(config, llm, messages, verifications, mystery_fn):
         llmout = llm_.invoke(messages + [prompt_maker(in_)])
         print("\n--- LLM ---")
         indented_print(llmout["thoughts"], "\n")
+        print()
+        indented_print("`" + str(llmout["expected_output"]) + "`\n")
 
         prompt_continue(config, "prompt-each-message")
 

@@ -7,9 +7,6 @@ class AbortException(Exception):
     pass
 
 def prompt_continue(config, key):
-    if config["debug"] == None:
-        return
-
     if key in config["debug"]:
         while True:
             choice = input("Do you want to continue? (y/n): ").strip().lower()

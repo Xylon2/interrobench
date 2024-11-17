@@ -5,11 +5,11 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.prompts import ChatPromptTemplate
 
 class NoToolException(Exception):
-    """Custom exception for user aborting the operation."""
+    """When the LLM doesn't use it's tool when it was expected to."""
     pass
 
 class MsgLimitException(Exception):
-    """Custom exception for user aborting the operation."""
+    """When the LLM uses too many messages."""
     pass
 
 initial_messages = [
@@ -29,7 +29,7 @@ I would like you to test my function using the provided tool until you think you
 def print_tool_call(tool_call, result):
     indented_print(", ".join(map(str, tool_call["args"].values())), "→", result.content)
 
-def interrogate(config, llm, mystery_fn, msgfmt):
+def interrogate(config, llm, mystery_fn):
     msg_limit = config["msg-limit"]
     debug = config["debug"]
 
@@ -42,7 +42,7 @@ def interrogate(config, llm, mystery_fn, msgfmt):
                                        # list() to force a copy
 
     for count in range(0, msg_limit):
-        # send the chat
+        # send the chat.
         llmout = llm.invoke(messages)
 
         # append for convo history
@@ -52,7 +52,7 @@ def interrogate(config, llm, mystery_fn, msgfmt):
         tool_calls = llmout.tool_calls  # list of dicts
 
         print("\n--- LLM ---")
-        indented_print(msgfmt(llm_msg))
+        indented_print(llm_msg)
         
         # if it called the tool
         if tool_calls:

@@ -7,23 +7,6 @@ from langchain.tools import tool
 from string import ascii_lowercase
 from toolz.dicttoolz import update_in
 
-def list_to_alphabet_map(lst):
-    """
-    Maps a list to a dictionary with keys as sequential lowercase letters.
-    
-    :param lst: List of values to map
-    :return: Dictionary with letters as keys
-    """
-
-    # Ensure the list is not longer than the available letters
-    if len(lst) > len(ascii_lowercase):
-        raise ValueError("List is too long to map to alphabetic letters.")
-
-    return dict(zip(ascii_lowercase, lst))
-
-def map_alphabet(xs):
-    return [list_to_alphabet_map(x) for x in xs]
-
 interrogees = []
 
 # booleans
@@ -174,13 +157,22 @@ interrogees.append({"name": "subtract and divide",
 
 # string manipulations
 @tool("test_function")
+def remove_last_letter(a: str) -> str:
+    """Use this tool to test the mystery function."""
+    return a[:-1]
+
+interrogees.append({"name": "remove last letter",
+                    "function": remove_last_letter,
+                    "verifications": [["hello"], ["world"]]})
+
+@tool("test_function")
 def concatenate(a: str, b: str) -> str:
     """Use this tool to test the mystery function."""
     return a + b
 
 interrogees.append({"name": "concatenate",
                     "function": concatenate,
-                    "verifications": [["hello", "world"], ["foo", "bar"], ["abc", "123"]]})
+                    "verifications": [["banana", "potato"], ["bar", "foo"]]})
 
 @tool("test_function")
 def reverse_string(a: str) -> str:
@@ -201,15 +193,6 @@ interrogees.append({"name": "uppercase string",
                     "verifications": [["hello"], ["world"], ["abc"]]})
 
 @tool("test_function")
-def lowercase_string(a: str) -> str:
-    """Use this tool to test the mystery function."""
-    return a.lower()
-
-interrogees.append({"name": "lowercase string",
-                    "function": lowercase_string,
-                    "verifications": [["HELLO"], ["WORLD"], ["ABC"]]})
-
-@tool("test_function")
 def string_length(a: str) -> int:
     """Use this tool to test the mystery function."""
     return len(a)
@@ -217,6 +200,24 @@ def string_length(a: str) -> int:
 interrogees.append({"name": "string length",
                     "function": string_length,
                     "verifications": [["hello"], ["world"], ["abcdefg"]]})
+
+@tool("test_function")
+def repeat_string(a: str, b: int) -> str:
+    """Use this tool to test the mystery function."""
+    return a * b
+
+interrogees.append({"name": "repeat string",
+                    "function": repeat_string,
+                    "verifications": [["hello", 3], ["abc", 5]]})
+
+@tool("test_function")
+def count_es(a: str) -> str:
+    """Use this tool to test the mystery function."""
+    return a.count('e')
+
+interrogees.append({"name": "count e's",
+                    "function": count_es,
+                    "verifications": [["hello"], ["world"], ["the quick brown fox jumped over the lazy dog"]]})
 
 @tool("test_function")
 def contains_substring(a: str, b: str) -> bool:
@@ -227,14 +228,24 @@ interrogees.append({"name": "contains substring",
                     "function": contains_substring,
                     "verifications": [["hello world", "world"], ["foobar", "bar"], ["abc", "d"]]})
 
-@tool("test_function")
-def repeat_string(a: str, b: int) -> str:
-    """Use this tool to test the mystery function."""
-    return a * b
+###
 
-interrogees.append({"name": "repeat string",
-                    "function": repeat_string,
-                    "verifications": [["hello", 3], ["abc", 5]]})
+def list_to_alphabet_map(lst):
+    """
+    Maps a list to a dictionary with keys as sequential lowercase letters.
+    
+    :param lst: List of values to map
+    :return: Dictionary with letters as keys
+    """
+
+    # Ensure the list is not longer than the available letters
+    if len(lst) > len(ascii_lowercase):
+        raise ValueError("List is too long to map to alphabetic letters.")
+
+    return dict(zip(ascii_lowercase, lst))
+
+def map_alphabet(xs):
+    return [list_to_alphabet_map(x) for x in xs]
 
 # make it look the way langchain likes it
 interrogees_ = [update_in(m, ["verifications"], map_alphabet) for m in interrogees]
