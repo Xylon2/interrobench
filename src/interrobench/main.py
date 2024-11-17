@@ -43,12 +43,11 @@ def print_aligned_tuples(tuple_list):
         print(f"  {first:<{max_length}}  {second}")
 
 def has_n_duplicates(n, bool_list):
-    # Ensure the list contains at least 3 of either True or False
+    """Ensure the list contains at least n of either True or False"""
     return bool_list.count(True) >= n or bool_list.count(False) >= n
 
 def most_common_element(bool_list):
-    
-    # Count occurrences of True and False
+    """return the most common element in the list"""
     count_true = bool_list.count(True)
     count_false = bool_list.count(False)
     
