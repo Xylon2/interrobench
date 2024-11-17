@@ -105,7 +105,7 @@ def main():
 
     test_results = reduce(lambda a, b: rfn(config, llm, a, b), interrogees_, {"score": 0, "wrong": []})
 
-    print("\n### SYSTEM:")
+    print("\n### SYSTEM: tests complete for model", model["name"])
     print("Ran", len(interrogees_), "tests.")
     print("Final score:", test_results["score"])
     print("Wrong answers:")
