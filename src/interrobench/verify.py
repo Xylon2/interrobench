@@ -4,6 +4,21 @@ from shared import prompt_continue, indented_print
 from typing_extensions import Annotated, TypedDict
 from itertools import tee
 
+class InvalidLLMOutputError(Exception):
+    """Custom exception for invalid LLM output."""
+    def __init__(self, message):
+        super().__init__(message)
+
+def validate_llmout(llmout):
+    """Check if `llmout` is a dict with the required keys"""
+    if not isinstance(llmout, dict):
+        raise InvalidLLMOutputError("llmout must be a dictionary.")
+    
+    required_keys = {"thoughts", "expected_output"}
+    if not required_keys.issubset(llmout.keys()):
+        missing_keys = required_keys - llmout.keys()
+        raise InvalidLLMOutputError(f"Missing keys in llmout: {', '.join(missing_keys)}")
+
 def map_to_multiline_string(data: dict) -> str:
     "print the input arguments in a nice string format for the LLM"
     return "\n".join(f"{key}: {value}" for key, value in data.items())
@@ -49,6 +64,9 @@ def verify(config, llm, messages, verifications, mystery_fn):
 
         # amnesia between tests is fine
         llmout = llm_.invoke(messages + [prompt_maker(in_)])
+
+        validate_llmout(llmout)
+
         print("\n--- LLM ---")
         indented_print(llmout["thoughts"], "\n")
         print()

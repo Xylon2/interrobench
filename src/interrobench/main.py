@@ -2,12 +2,13 @@ import yaml
 import os
 from functools import reduce
 from toolz.dicttoolz import update_in
+from pydantic import ValidationError
 
 # other modules
 from interrogees import interrogees_
 from shared import prompt_continue
 from interrogate import interrogate, NoToolException, MsgLimitException
-from verify import verify
+from verify import verify, InvalidLLMOutputError
 
 # providers
 from langchain_openai import ChatOpenAI
@@ -56,13 +57,22 @@ def rfn(config, llm, acc, mystery_fn):
     # run the interrogation
     try:
         messages = interrogate(config, llm_w_tool, mystery_fn)
-    except (UnprocessableEntityError, MsgLimitException, NoToolException) as e:
+    except (UnprocessableEntityError, MsgLimitException, NoToolException, InvalidLLMOutputError, ValidationError) as e:
+        # these errors are considered to be the LLM's fault, so it will not get any points awarded
         print(e)
         return update_in(acc, ["wrong"], lambda xs: xs + [(name, type(e).__name__)])
 
     print("\n### SYSTEM: verifying function", name)
+
     # run the verification
-    if verify(config, llm_wo_tool, messages, verifications, mystery_fn):
+    try:
+        verified = verify(config, llm_wo_tool, messages, verifications, mystery_fn)
+    except (UnprocessableEntityError) as e:
+        # these errors are considered to be the LLM's fault, so it will not get any points awarded
+        print(e)
+        return update_in(acc, ["wrong"], lambda xs: xs + [(name, type(e).__name__)])
+
+    if verified:
         return update_in(acc, ["score"], lambda n: n + 1)
     else:
         return update_in(acc, ["wrong"], lambda xs: xs + [(name, "wrong answer")])
@@ -80,7 +90,6 @@ def main():
         case "anthropic":
             llm = ChatAnthropic(model=model["name"], api_key=api_keys["anthropic"])
         case "cohere":
-            # doesn't work due to UnprocessableEntityError
             os.environ["COHERE_API_KEY"] = api_keys["cohere"]
             llm = ChatCohere(model=model["name"], co_api_key=api_keys["cohere"])
         case "xai":
