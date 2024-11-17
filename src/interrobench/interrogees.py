@@ -111,6 +111,15 @@ interrogees.append({"name": "multiplication",
                     "verifications": [[3, 2], [4, 5], [0, 9]]})
 
 @tool("test_function")
+def ignore_one(a: int, b: int, c: int) -> int:
+    """Use this tool to test the mystery function."""
+    return a * c
+
+interrogees.append({"name": "ignore one argument",
+                    "function": ignore_one,
+                    "verifications": [[3, 2, 9], [4, 5, 2], [0, 9, 3]]})
+
+@tool("test_function")
 def integer_division(a: int, b: int) -> str:
     """Use this tool to test the mystery function."""
     return "Undefined" if b == 0 else a // b

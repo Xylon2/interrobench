@@ -2,6 +2,7 @@ import yaml
 import os
 from functools import reduce
 from toolz.dicttoolz import update_in
+import math
 from pydantic import ValidationError
 
 # other modules
@@ -41,41 +42,67 @@ def print_aligned_tuples(tuple_list):
     for first, second in tuple_list:
         print(f"  {first:<{max_length}}  {second}")
 
+def has_n_duplicates(n, bool_list):
+    # Ensure the list contains at least 3 of either True or False
+    return bool_list.count(True) >= n or bool_list.count(False) >= n
+
+def most_common_element(bool_list):
+    
+    # Count occurrences of True and False
+    count_true = bool_list.count(True)
+    count_false = bool_list.count(False)
+    
+    # Return the most common element
+    return True if count_true >= count_false else False
+
+def interrogate_and_verify(config, llm_w_tool, llm_wo_tool, mystery_fn):
+    name = mystery_fn["name"]
+    verifications = mystery_fn["verifications"]
+
+    print("\n### SYSTEM: interrogating function", name)
+    # run the interrogation
+    messages = interrogate(config, llm_w_tool, mystery_fn)
+
+    print("\n### SYSTEM: verifying function", name)
+
+    return verify(config, llm_wo_tool, messages, verifications, mystery_fn)
+    
 def rfn(config, llm, acc, mystery_fn):
     name = mystery_fn["name"]
     function = mystery_fn["function"]
-    verifications = mystery_fn["verifications"]
 
     prompt_continue(config, "prompt-each-interrogation")
     print("\n######################################################")
-    print("### SYSTEM: interrogating function", name)
+    print("### SYSTEM: testing function", name)
     print("######################################################")
 
     llm_wo_tool = llm
     llm_w_tool = llm.bind_tools([function])
 
-    # run the interrogation
-    try:
-        messages = interrogate(config, llm_w_tool, mystery_fn)
-    except (UnprocessableEntityError, MsgLimitException, NoToolException, InvalidLLMOutputError, ValidationError) as e:
-        # these errors are considered to be the LLM's fault, so it will not get any points awarded
-        print(e)
-        return update_in(acc, ["wrong"], lambda xs: xs + [(name, type(e).__name__)])
+    required_wins = math.ceil(config["best-of"] / 2)
 
-    print("\n### SYSTEM: verifying function", name)
+    scores = []
+    failures = []
+    while not has_n_duplicates(required_wins, scores):
+        try:
+            result = interrogate_and_verify(config, llm_w_tool, llm_wo_tool, mystery_fn)
+            scores.append(result)
+            if not result:
+                failures.append("wrong answer")
 
-    # run the verification
-    try:
-        verified = verify(config, llm_wo_tool, messages, verifications, mystery_fn)
-    except (UnprocessableEntityError) as e:
-        # these errors are considered to be the LLM's fault, so it will not get any points awarded
-        print(e)
-        return update_in(acc, ["wrong"], lambda xs: xs + [(name, type(e).__name__)])
+        except (UnprocessableEntityError, MsgLimitException, NoToolException, InvalidLLMOutputError, ValidationError) as e:
+            # these errors are considered to be the LLM's fault, so it will not get any points awarded
+            print(e)
+            scores.append(False)
+            failures.append(type(e).__name__)
 
-    if verified:
+    if most_common_element(scores):  # if more True than False
+        print("\n### SYSTEM: best of", config["best-of"], "passed after", len(scores), "runs")
         return update_in(acc, ["score"], lambda n: n + 1)
+
     else:
-        return update_in(acc, ["wrong"], lambda xs: xs + [(name, "wrong answer")])
+        print("\n### SYSTEM: best of", config["best-of"], "failed after", len(scores), "runs")
+        return update_in(acc, ["wrong"], lambda xs: xs + [(name, set(failures))])
 
 def main():
     config = load_config("resources/config.yaml") | load_config("resources/credentials.yaml")
@@ -114,9 +141,9 @@ def main():
 
     test_results = reduce(lambda a, b: rfn(config, llm, a, b), interrogees_, {"score": 0, "wrong": []})
 
-    print("\n### SYSTEM: tests complete for model", model["name"])
-    print("Ran", len(interrogees_), "tests.")
-    print("Final score:", test_results["score"])
+    print("\n### SYSTEM: tests complete for model `" + model["name"] + "`. Best of", config["best-of"])
+    print("Final score:", test_results["score"], "/", len(interrogees_))
+    print("Percent:", (test_results["score"] * 100) // len(interrogees_))
     print("Wrong answers:")
     print_aligned_tuples(test_results["wrong"])
 

@@ -23,6 +23,7 @@ A `resources/config.yaml` should look like this (uncomment sections as appropria
 ---
 
 msg-limit: 30
+best-of: 5
 model:
   name: "claude-3-5-haiku-20241022"
   provider: "anthropic"
