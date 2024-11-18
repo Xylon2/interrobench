@@ -1,4 +1,5 @@
 # InterroBench
+[![Python application](https://github.com/Xylon2/interrobench/actions/workflows/python-app.yml/badge.svg)](https://github.com/Xylon2/interrobench/actions/workflows/python-app.yml)
 
 ## Intro
 
