@@ -6,10 +6,10 @@ import math
 from pydantic import ValidationError
 
 # other modules
-from interrogees import interrogees_
-from shared import prompt_continue
-from interrogate import interrogate, NoToolException, MsgLimitException
-from verify import verify, InvalidLLMOutputError
+from .interrogees import interrogees_
+from .shared import prompt_continue
+from .interrogate import interrogate, NoToolException, MsgLimitException
+from .verify import verify, InvalidLLMOutputError
 
 # providers
 from langchain_openai import ChatOpenAI
@@ -34,10 +34,10 @@ def load_config(filepath):
 def print_aligned_tuples(tuple_list):
     if not tuple_list:
         return
-    
+
     # Find the maximum length of the first elements
     max_length = max(len(t[0]) for t in tuple_list)
-    
+
     # Print each tuple with proper alignment
     for first, second in tuple_list:
         print(f"  {first:<{max_length}}  {second}")
@@ -46,13 +46,21 @@ def has_n_duplicates(n, bool_list):
     """Ensure the list contains at least n of either True or False"""
     return bool_list.count(True) >= n or bool_list.count(False) >= n
 
+class EqualCountError(Exception):
+    """Exception raised when True and False have equal counts in the list."""
+    pass
+
 def most_common_element(bool_list):
     """return the most common element in the list"""
     count_true = bool_list.count(True)
     count_false = bool_list.count(False)
-    
-    # Return the most common element
-    return True if count_true >= count_false else False
+
+    if count_true > count_false:
+        return True
+    elif count_false > count_true:
+        return False
+    else:
+        raise EqualCountError("True and False occur equally in the list.")
 
 def interrogate_and_verify(config, llm_w_tool, llm_wo_tool, mystery_fn):
     name = mystery_fn["name"]
@@ -65,7 +73,7 @@ def interrogate_and_verify(config, llm_w_tool, llm_wo_tool, mystery_fn):
     print("\n### SYSTEM: verifying function", name)
 
     return verify(config, llm_wo_tool, messages, verifications, mystery_fn)
-    
+
 def rfn(config, llm, acc, mystery_fn):
     name = mystery_fn["name"]
     function = mystery_fn["function"]

@@ -3,8 +3,8 @@ These are the mystery functions which the LLM will interrogate to find out what 
 Each also has a set of verifications which the system will use to check the LLM gets it right.
 """
 
-from langchain.tools import tool
 from string import ascii_lowercase
+from langchain.tools import tool
 from toolz.dicttoolz import update_in
 
 interrogees = []
@@ -242,7 +242,7 @@ interrogees.append({"name": "contains substring",
 def list_to_alphabet_map(lst):
     """
     Maps a list to a dictionary with keys as sequential lowercase letters.
-    
+
     :param lst: List of values to map
     :return: Dictionary with letters as keys
     """

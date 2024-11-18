@@ -61,4 +61,6 @@ Running it should be essentially:
 - ensure you have python3, pip and virtualenv installed
 - make a virtualenv
 - use pip to install the deps from `requirements.txt`
-- execute `src/interrobench/main.py` in the terminal
+- install interrobench into your virtualenv with `pip install -e .`
+- type `pytest` to run tests
+- type `interrobench` to run the benchmark

@@ -1,5 +1,5 @@
 from pprint import pprint
-from shared import prompt_continue, indented_print
+from .shared import prompt_continue, indented_print
 
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.prompts import ChatPromptTemplate
@@ -53,7 +53,7 @@ def interrogate(config, llm, mystery_fn):
 
         print("\n--- LLM ---")
         indented_print(llm_msg)
-        
+
         # if it called the tool
         if tool_calls:
             print("\n### SYSTEM: calling tool")
@@ -61,7 +61,7 @@ def interrogate(config, llm, mystery_fn):
                 call_result = fn_fn.invoke(tool_call)
 
                 print_tool_call(tool_call, call_result)
-                
+
                 messages.append(call_result)
 
                 tool_call_count += 1
@@ -72,7 +72,7 @@ def interrogate(config, llm, mystery_fn):
         else:
             if tool_call_count == 0:
                 raise NoToolException("LLM didn't use it's tool.")
-            
+
             print("\n### SYSTEM: The tool was used", tool_call_count, "times.")
 
             return(messages)

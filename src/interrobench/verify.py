@@ -1,8 +1,9 @@
 from pprint import pprint
-from shared import prompt_continue, indented_print
+from itertools import tee
+
+from .shared import prompt_continue, indented_print
 
 from typing_extensions import Annotated, TypedDict
-from itertools import tee
 
 class InvalidLLMOutputError(Exception):
     """Custom exception for invalid LLM output."""
@@ -13,7 +14,7 @@ def validate_llmout(llmout):
     """Check if `llmout` is a dict with the required keys"""
     if not isinstance(llmout, dict):
         raise InvalidLLMOutputError("llmout must be a dictionary.")
-    
+
     required_keys = {"thoughts", "expected_output"}
     if not required_keys.issubset(llmout.keys()):
         missing_keys = required_keys - llmout.keys()
@@ -33,9 +34,9 @@ def make_schema(eo_type):
     return Prediction
 
 def prompt_maker(f_input):
-        formatted =  map_to_multiline_string(f_input)
+    formatted =  map_to_multiline_string(f_input)
 
-        return f"""To test your theory, please tell me what is the expected output from the function with this input:
+    return f"""To test your theory, please tell me what is the expected output from the function with this input:
 
 {formatted}
 
