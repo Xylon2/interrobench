@@ -15,6 +15,8 @@ When the LLM is confident it has figured it out, then the system tests the LLM
 got it right by asking it what output it would expect the function to provide
 from a given input.
 
+If you want to see the results: see [The LeaderBoard](https://interrobench.com/).
+
 ## Running
 
 If you want to run this benchmark yourself, you will need to create a couple of config files:
