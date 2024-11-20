@@ -3,7 +3,7 @@
 
 ## Intro
 
-A novel benchmark for LLMs.
+InterroBench is a novel benchmark for LLMs.
 
 Each test is a conversation where the AI has to interrogate a mystery
 function to find out what it does.

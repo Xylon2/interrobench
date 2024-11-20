@@ -258,3 +258,6 @@ def map_alphabet(xs):
 
 # make it look the way langchain likes it
 interrogees_ = [update_in(m, ["verifications"], map_alphabet) for m in interrogees]
+
+# wishlist
+# - median of 5 values?
