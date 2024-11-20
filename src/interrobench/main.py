@@ -1,15 +1,10 @@
-import yaml
 import os
 from functools import reduce
-from toolz.dicttoolz import update_in
 import math
-from pydantic import ValidationError
 
-# other modules
-from .interrogees import interrogees_
-from .shared import prompt_continue
-from .interrogate import interrogate, NoToolException, MsgLimitException
-from .verify import verify, InvalidLLMOutputError
+import yaml
+from toolz.dicttoolz import update_in
+from pydantic import ValidationError
 
 # providers
 from langchain_openai import ChatOpenAI
@@ -19,6 +14,12 @@ from langchain_xai import ChatXAI
 from langchain_groq import ChatGroq
 from langchain_cohere import ChatCohere
 from cohere import UnprocessableEntityError
+
+# other modules
+from .interrogees import interrogees_
+from .shared import prompt_continue
+from .interrogate import interrogate, NoToolException, MsgLimitException
+from .verify import verify, InvalidLLMOutputError
 
 def load_config(filepath):
     with open(filepath, "r") as file:

@@ -81,5 +81,5 @@ def verify(config, llm, messages, verifications, mystery_fn):
             print("\n### SYSTEM: WRONG")
             return False
 
-    # if we got here all tests passed
+    # if we got here all the verifications passed
     return True
