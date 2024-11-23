@@ -4,6 +4,7 @@ Each also has a set of verifications which the system will use to check the LLM 
 """
 
 from string import ascii_lowercase
+import statistics
 from langchain.tools import tool
 from toolz.dicttoolz import update_in
 
@@ -111,6 +112,146 @@ interrogees.append({"name": "multiplication",
                     "verifications": [[3, 2], [4, 5], [0, 9]]})
 
 @tool("test_function")
+def float_division(a: int, b: int) -> str | float:
+    """Use this tool to test the mystery function."""
+    return "Undefined" if b == 0 else a / b
+
+interrogees.append({"name": "float division",
+                    "function": float_division,
+                    "verifications": [[1, 2], [4, 5], [45, 16]]})
+
+@tool("test_function")
+def is_odd(a: int) -> bool:
+    """Use this tool to test the mystery function."""
+    return a % 2 == 1
+
+interrogees.append({"name": "is odd",
+                   "function": is_odd,
+                   "verifications": [[100], [13], [42], [93]]})
+
+@tool("test_function")
+def triangle_third_angle(a: int, b: int) -> int:
+    """Use this tool to test the mystery function."""
+    return 180 - a - b
+
+interrogees.append({"name": "triangle third angle",
+                   "function": triangle_third_angle,
+                   "verifications": [[60, 60], [45, 45], [30, 60], [90, 45], [120, 30]]})
+
+@tool("test_function")
+def between_3_and_6(a: int) -> bool:
+    """Use this tool to test the mystery function."""
+    return 3 < a < 6
+
+interrogees.append({"name": "between 3 and 6",
+                   "function": between_3_and_6,
+                   "verifications": [[2], [3], [5], [6], [7]]})
+
+@tool("test_function")
+def square(a: int) -> int:
+    """Use this tool to test the mystery function."""
+    return a * a
+
+interrogees.append({"name": "square",
+                   "function": square,
+                   "verifications": [[2], [6], [10]]})
+
+@tool("test_function")
+def divide_by_4(a: int) -> float:
+    """Use this tool to test the mystery function."""
+    return a / 4
+
+interrogees.append({"name": "divide by 4",
+                   "function": divide_by_4,
+                   "verifications": [[4], [8], [1], [16]]})
+
+@tool("test_function")
+def integer_division(a: int, b: int) -> str | int:
+    """Use this tool to test the mystery function."""
+    return "Undefined" if b == 0 else a // b
+
+interrogees.append({"name": "integer division",
+                    "function": integer_division,
+                    "verifications": [[1, 2], [4, 5], [45, 16]]})
+
+@tool("test_function")
+def remainder(a: int, b: int) -> str | int:
+    """Use this tool to test the mystery function."""
+    return "Undefined" if b == 0 else a % b
+
+interrogees.append({"name": "remainder",
+                    "function": remainder,
+                    "verifications": [[3, 2], [45, 16], [13, 13]]})
+
+@tool("test_function")
+def median(a: int, b: int, c: int, d: int, e: int) -> int:
+    """Use this tool to test the mystery function."""
+    return statistics.median([a, b, c, d, e])
+
+interrogees.append({"name": "median of 5",
+                    "function": median,
+                    "verifications": [[1, 2, 3, 4, 5], [40, 15, 60, 3, 13], [0, 0, 0, 4, 400]]})
+
+@tool("test_function")
+def circle_circumference(radius: int) -> float:
+    """Use this tool to test the mystery function."""
+    return 2 * 3.14159 * radius
+
+interrogees.append({"name": "circle circumference",
+                   "function": circle_circumference,
+                   "verifications": [[1], [5], [10], [0], [100]]})
+
+@tool("test_function")
+def find_higher(a: int, b: int) -> int:
+    """Use this tool to test the mystery function."""
+    return max(a, b)
+
+interrogees.append({"name": "find higher number",
+                   "function": find_higher,
+                   "verifications": [[10, 5], [3, 8], [-2, -5], [7, 7]]})
+
+@tool("test_function")
+def is_prime(a: int) -> bool:
+    """Use this tool to test the mystery function."""
+    if a < 2:
+        return False
+    for i in range(2, int(a ** 0.5) + 1):
+        if a % i == 0:
+            return False
+    return True
+
+interrogees.append({"name": "is prime",
+                   "function": is_prime,
+                   "verifications": [[2], [7], [4], [1], [13], [25]]})
+
+@tool("test_function")
+def concatenate_numbers(a: int, b: int, c: int) -> int:
+    """Use this tool to test the mystery function."""
+    return int(str(abs(a)) + str(abs(b)) + str(abs(c)))
+
+interrogees.append({"name": "concatenate numbers",
+                   "function": concatenate_numbers,
+                   "verifications": [[1, 2, 3], [5, 10, 15], [42, 0, 7]]})
+
+@tool("test_function")
+def count_digits(a: int) -> int:
+    """Use this tool to test the mystery function."""
+    return len(str(abs(a)))
+
+interrogees.append({"name": "count digits",
+                   "function": count_digits,
+                   "verifications": [[123], [5556], [0], [9]]})
+
+@tool("test_function")
+def difference_from_12_doubled(a: int) -> int:
+    """Use this tool to test the mystery function."""
+    return abs(12 - a) * 2
+
+interrogees.append({"name": "difference from 12 doubled",
+                   "function": difference_from_12_doubled,
+                   "verifications": [[10], [14], [12], [0], [24], [-4]]})
+
+@tool("test_function")
 def ignore_one(a: int, b: int, c: int) -> int:
     """Use this tool to test the mystery function."""
     return a * c
@@ -120,25 +261,26 @@ interrogees.append({"name": "ignore one argument",
                     "verifications": [[3, 2, 9], [4, 5, 2], [0, 9, 3]]})
 
 @tool("test_function")
-def integer_division(a: int, b: int) -> str:
+def sum_bigger_than_9(a: int, b: int) -> bool:
     """Use this tool to test the mystery function."""
-    return "Undefined" if b == 0 else a // b
+    return (a + b) > 9
 
-interrogees.append({"name": "integer division",
-                    "function": integer_division,
-                    "verifications": [[1, 2], [4, 5], [45, 16]]})
+interrogees.append({"name": "sum bigger than 9",
+                   "function": sum_bigger_than_9,
+                   "verifications": [[5, 5], [2, 3], [8, 2], [4, 5]]})
 
 @tool("test_function")
-def remainder(a: int, b: int) -> str:
+def closest_pair_difference(a: int, b: int, c: int) -> int:
     """Use this tool to test the mystery function."""
-    return "Undefined" if b == 0 else a % b
+    diffs = [abs(a - b), abs(b - c), abs(a - c)]
+    return min(diffs)
 
-interrogees.append({"name": "remainder",
-                    "function": remainder,
-                    "verifications": [[3, 2], [45, 16], [13, 13]]})
+interrogees.append({"name": "difference of closest pair",
+                   "function": closest_pair_difference,
+                   "verifications": [[1, 5, 8], [10, 11, 15], [0, 7, 2], [4, 4, 8]]})
 
 @tool("test_function")
-def add_and_subtract(a: int, b: int, c: int) -> str:
+def add_and_subtract(a: int, b: int, c: int) -> int:
     """Use this tool to test the mystery function."""
     return a + b - c
 
@@ -147,7 +289,7 @@ interrogees.append({"name": "add and subtract",
                     "verifications": [[5, 2, 3], [4, 5, 9], [25, 15, 1]]})
 
 @tool("test_function")
-def multiply_and_add(a: int, b: int, c: int) -> str:
+def multiply_and_add(a: int, b: int, c: int) -> int:
     """Use this tool to test the mystery function."""
     return a * b + c
 
@@ -163,6 +305,66 @@ def subtract_and_divide(a: int, b: int, c: int) -> str:
 interrogees.append({"name": "subtract and divide",
                     "function": subtract_and_divide,
                     "verifications": [[10, 2, 2], [35, 16, 4], [13, 3, 5]]})
+
+@tool("test_function")
+def times_3_round_5(a: int) -> int:
+    """Use this tool to test the mystery function."""
+    return round(a * 3 / 5) * 5
+
+interrogees.append({"name": "times 3 round to nearest 5",
+                   "function": times_3_round_5,
+                   "verifications": [[10], [7], [3], [0], [15], [-4]]})
+
+@tool("test_function")
+def pythagorean(a: int, b: int) -> float:
+    """Use this tool to test the mystery function."""
+    return (a * a + b * b) ** 0.5
+
+interrogees.append({"name": "pythagorean theorem",
+                   "function": pythagorean,
+                   "verifications": [[3, 4], [5, 12], [8, 15]]})
+
+@tool("test_function")
+def greatest_common_factor(a: int, b: int) -> int:
+    """Use this tool to test the mystery function."""
+    while b:
+        a, b = b, a % b
+    return abs(a)
+
+interrogees.append({"name": "greatest common factor",
+                   "function": greatest_common_factor,
+                   "verifications": [[12, 18], [54, 24], [7, 13], [100, 25]]})
+
+@tool("test_function")
+def modulus_3_as_string(a: int) -> str:
+    """Use this tool to test the mystery function."""
+    fruits = {1: "apple", 2: "orange", 0: "banana"}
+    return fruits[a % 3]
+
+interrogees.append({"name": "modulus 3 as string",
+                   "function": modulus_3_as_string,
+                   "verifications": [[7], [5], [0], [15]]})
+
+@tool("test_function")
+def set_heading(a: int, b: int) -> str:
+    """Use this tool to test the mystery function."""
+    lat = 36
+    long = 140
+
+    vdiff = lat - a
+    hdiff = long - b
+
+    if vdiff == 0 and hdiff == 0:
+        return "You've arrived!"
+    
+    if abs(vdiff) > abs(hdiff):
+        return "North" if vdiff > 0 else "South"
+    else:
+        return "East" if hdiff > 0 else "West"
+
+interrogees.append({"name": "set heading",
+                   "function": set_heading,
+                   "verifications": [[12, 18], [54, 144], [30, 144], [30, 150]]})
 
 # string manipulations
 @tool("test_function")
@@ -202,6 +404,15 @@ interrogees.append({"name": "uppercase string",
                     "verifications": [["hello"], ["world"], ["abc"]]})
 
 @tool("test_function")
+def count_vowels(s: str) -> int:
+    """Use this tool to test the mystery function."""
+    return sum(1 for char in s.lower() if char in 'aeiou')
+
+interrogees.append({"name": "count vowels",
+                   "function": count_vowels,
+                   "verifications": [["hello"], ["aardvark"], ["rhythm"], ["Python"]]})
+
+@tool("test_function")
 def string_length(a: str) -> int:
     """Use this tool to test the mystery function."""
     return len(a)
@@ -220,6 +431,48 @@ interrogees.append({"name": "repeat string",
                     "verifications": [["hello", 3], ["abc", 5]]})
 
 @tool("test_function")
+def minimum_five_chars(s: str) -> str | bool:
+    """Use this tool to test the mystery function."""
+    return s if len(s) >= 5 else False
+
+interrogees.append({"name": "minimum five characters",
+                   "function": minimum_five_chars,
+                   "verifications": [["hello"], ["cat"], ["python"], [""], ["abcde"]]})
+
+@tool("test_function")
+def delete_second_and_reverse(s: str) -> str:
+    """Use this tool to test the mystery function."""
+    if len(s) < 2:
+        return s
+    return (s[0] + s[2:])[::-1]
+
+interrogees.append({"name": "delete second letter and reverse",
+                   "function": delete_second_and_reverse,
+                   "verifications": [["hello"], ["python"], ["test"]]})
+
+@tool("test_function")
+def longest_common_substring(s1: str, s2: str) -> str:
+    """Use this tool to test the mystery function."""
+    if not s1 or not s2:
+        return ""
+    m = [[0] * (len(s2) + 1) for _ in range(len(s1) + 1)]
+    longest, x_longest = 0, 0
+    for x in range(len(s1)):
+        for y in range(len(s2)):
+            if s1[x] == s2[y]:
+                m[x + 1][y + 1] = m[x][y] + 1
+                if m[x + 1][y + 1] > longest:
+                    longest = m[x + 1][y + 1]
+                    x_longest = x + 1
+    return s1[x_longest - longest:x_longest]
+
+interrogees.append({"name": "longest common substring",
+                   "function": longest_common_substring,
+                   "verifications": [["hello", "world"], ["python", "typhoon"], ["abcde", "cdefg"], ["cat", "hat"], ["", "test"]]})
+
+
+# hard questions
+@tool("test_function")
 def count_es(a: str) -> str:
     """Use this tool to test the mystery function."""
     return a.count('e')
@@ -236,6 +489,24 @@ def contains_substring(a: str, b: str) -> bool:
 interrogees.append({"name": "contains substring",
                     "function": contains_substring,
                     "verifications": [["hello world", "world"], ["foobar", "bar"], ["abc", "d"]]})
+
+@tool("test_function")
+def crack_lock(a: int, b: int, c: int, d: int) -> int | str:
+    """Use this tool to test the mystery function."""
+    code = [5, 3, 8, 4]
+
+    acc = 0
+    for real, attempt in zip(code, [a, b, c, d]):
+        acc += abs(real - attempt)
+
+    if acc == 0:
+        return "You got it!"
+    else:
+        return acc
+
+interrogees.append({"name": "crack lock",
+                    "function": crack_lock,
+                    "verifications": [[1, 9, 7, 7], [9, 5, 9, 8], [4, 2, 1, 0]]})
 
 ###
 
@@ -258,6 +529,3 @@ def map_alphabet(xs):
 
 # make it look the way langchain likes it
 interrogees_ = [update_in(m, ["verifications"], map_alphabet) for m in interrogees]
-
-# wishlist
-# - median of 5 values?
