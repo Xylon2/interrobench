@@ -1,7 +1,6 @@
-from pprint import pprint
 from itertools import tee
 
-from .shared import prompt_continue, indented_print
+from .shared import prompt_continue
 
 from typing_extensions import Annotated, TypedDict
 
@@ -45,7 +44,7 @@ You no-longer have access to the tool because I am testing if you have got it ri
 Please respond in JSON with two keys: \"thoughts\" and \"expected_output\".
 The expected_output key will be used automatically to check your results so only include the output you expect from the function. And use the thoughts key to explain your workings."""
 
-def verify(config, llm, messages, verifications, mystery_fn):
+def verify(config, llm, messages, verifications, printer, mystery_fn):
     # We will loop through the verifications. For each, we prompt the LLM and
     # check it's response. The first one it gets wrong, we abort.
 
@@ -60,25 +59,25 @@ def verify(config, llm, messages, verifications, mystery_fn):
         #print("in:", in_)
         #print("out:", out)
 
-        print("\n### SYSTEM: inputs:")
-        indented_print(map_to_multiline_string(in_))
+        printer.print("\n### SYSTEM: inputs:")
+        printer.indented_print(map_to_multiline_string(in_))
 
         # amnesia between tests is fine
         llmout = llm_.invoke(messages + [prompt_maker(in_)])
 
         validate_llmout(llmout)
 
-        print("\n--- LLM ---")
-        indented_print(llmout["thoughts"], "\n")
-        print()
-        indented_print("`" + str(llmout["expected_output"]) + "`\n")
+        printer.print("\n--- LLM ---")
+        printer.indented_print(llmout["thoughts"], "\n")
+        printer.print()
+        printer.indented_print("`" + str(llmout["expected_output"]) + "`\n")
 
         prompt_continue(config, "prompt-each-message")
 
         if llmout["expected_output"] == out:
-            print("\n### SYSTEM: CORRECT")
+            printer.print("\n### SYSTEM: CORRECT")
         else:
-            print("\n### SYSTEM: WRONG")
+            printer.print("\n### SYSTEM: WRONG")
             return False
 
     # if we got here all the verifications passed

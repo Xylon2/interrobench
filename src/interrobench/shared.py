@@ -18,20 +18,47 @@ def prompt_continue(config, key):
                 case _:
                     print("Please enter 'y' for yes or 'n' for no.")
 
-def indented_print(*args, sep=" ", end="\n", **kwargs):
-    """
-    Custom print function that prepends two spaces to every line,
-    wraps lines to terminal width - 5, and supports multi-line strings.
-    """
-    # Determine the terminal width, defaulting to 80 if unavailable
-    terminal_width = shutil.get_terminal_size((80, 20)).columns - 5
-    wrapper = textwrap.TextWrapper(width=terminal_width, subsequent_indent="  ", initial_indent="  ")
+class AccumulatingPrinter:
+    def __init__(self):
+        # Initialize the internal "megastring"
+        self.megastring = ""
 
-    # Combine all args into a single string as the built-in print would
-    output = sep.join(str(arg) for arg in args)
+    def print(self, *args):
+        """
+        Prints the concatenated string from the arguments and appends it to the megastring.
+        """
+        # Concatenate arguments with spaces
+        concatenated_string = " ".join(str(arg) for arg in args)
+        
+        # Print the concatenated string
+        print(concatenated_string)
+        
+        # Append the concatenated string to the megastring
+        self.megastring += concatenated_string + "\n"
 
-    # Split the output into lines, wrap each line, and prepend two spaces
-    wrapped_output = "\n".join(wrapper.fill(line) for line in output.splitlines())
+    def indented_print(self, *args):
+        """
+        Prints an indented and wrapped version of the concatenated string from the arguments,
+        and appends it to the megastring.
+        """
+        # Concatenate arguments with spaces
+        concatenated_string = " ".join(str(arg) for arg in args)
 
-    # Print the wrapped output
-    sys.stdout.write(wrapped_output + end)
+        # Get terminal width and calculate wrap width
+        terminal_width = shutil.get_terminal_size((80, 20)).columns
+        wrap_width = max(terminal_width - 5, 10)  # Ensure wrap width isn't too narrow
+
+        # Wrap the string and add indentation
+        wrapped_lines = textwrap.fill(concatenated_string, width=wrap_width, subsequent_indent="  ", initial_indent="  ")
+
+        # Print the indented string
+        print(wrapped_lines)
+
+        # Append the wrapped and indented string to the megastring
+        self.megastring += wrapped_lines + "\n"
+
+    def retrieve(self):
+        """
+        Returns the accumulated megastring.
+        """
+        return self.megastring
