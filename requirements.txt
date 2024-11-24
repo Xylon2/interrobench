@@ -40,7 +40,6 @@ httpx-sse==0.4.0
 huggingface-hub==0.26.2
 idna==3.10
 iniconfig==2.0.0
--e git+https://github.com/Xylon2/interrobench.git@8356383457e1ebd2b9ddeb779ed43425c47c4f69#egg=interrobench
 jiter==0.7.1
 jsonpatch==1.33
 jsonpointer==3.0.0

@@ -20,7 +20,19 @@ If you want to see the results: see [The LeaderBoard](https://interrobench.com/)
 
 ## Running
 
-If you want to run this benchmark yourself, you will need to create a couple of config files:
+If you want to run this benchmark yourself, you will need:
+- an account and API key for whichever LLM provider you want to use
+- a computer to install python and postgres on. postgres is how it stores analytics for each run
+
+First checkout this code.
+
+Install these:
+- postgresql-server and client
+- python3, pip and virtualenv
+
+Create a postgresql database and user.
+
+Create a couple of config files:
 
 A `resources/config.yaml` should look like this (uncomment sections as appropriate):
 ```
@@ -49,10 +61,11 @@ debug:
 
 ```
 
-And a `resources/credentials.yaml` containing your API keys:
+And a `resources/credentials.yaml` containing your db credentials and API keys:
 ```
 ---
 
+postgres-url: "postgresql://user:password@localhost/dbname"
 api-keys:
   anthropic: ""
   openai: ""
@@ -62,9 +75,9 @@ api-keys:
 ```
 
 Running it should be essentially:
-- ensure you have python3, pip and virtualenv installed
 - make a virtualenv and activate it
 - use pip to install the deps from `requirements.txt`
 - install interrobench into your virtualenv with `pip install -e .`
+- set variable DATABASE_URL for alembic and run `alembic upgrade head`
 - type `pytest` to run tests
 - type `interrobench` to run the benchmark
