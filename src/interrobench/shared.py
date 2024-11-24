@@ -39,7 +39,7 @@ class AccumulatingPrinter:
     def indented_print(self, *args):
         """
         Prints an indented and wrapped version of the concatenated string from the arguments,
-        and appends it to the megastring.
+        and appends it to the megastring, preserving input newlines.
         """
         # Concatenate arguments with spaces
         concatenated_string = " ".join(str(arg) for arg in args)
@@ -48,14 +48,21 @@ class AccumulatingPrinter:
         terminal_width = shutil.get_terminal_size((80, 20)).columns
         wrap_width = max(terminal_width - 5, 10)  # Ensure wrap width isn't too narrow
 
-        # Wrap the string and add indentation
-        wrapped_lines = textwrap.fill(concatenated_string, width=wrap_width, subsequent_indent="  ", initial_indent="  ")
+        # Split the string into lines to preserve existing newlines
+        lines = concatenated_string.splitlines()
+        wrapped_lines = []
+        for line in lines:
+            # Wrap each line individually and prepend indentation
+            wrapped_lines.append(textwrap.fill(line, width=wrap_width, subsequent_indent="  ", initial_indent="  "))
+
+        # Combine wrapped lines back into a single string
+        indented_string = "\n".join(wrapped_lines)
 
         # Print the indented string
-        print(wrapped_lines)
+        print(indented_string)
 
-        # Append the wrapped and indented string to the megastring
-        self.megastring += wrapped_lines + "\n"
+        # Append the indented string to the megastring
+        self.megastring += indented_string + "\n"
 
     def retrieve(self):
         """
