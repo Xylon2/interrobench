@@ -79,13 +79,17 @@ def interrogate_and_verify(config, llm_w_tool, llm_wo_tool, cursor, run_id, atte
     # setup the printer
     printer = AccumulatingPrinter()
 
-    printer.print("\n### SYSTEM: interrogating function", name)
-    # run the interrogation
-    messages, tool_call_count = interrogate(config, llm_w_tool, printer, mystery_fn)
+    try:
+        printer.print("\n### SYSTEM: interrogating function", name)
+        messages, tool_call_count = interrogate(config, llm_w_tool, printer, mystery_fn)
 
-    printer.print("\n### SYSTEM: verifying function", name)
+        printer.print("\n### SYSTEM: verifying function", name)
+        verification_result = verify(config, llm_wo_tool, messages, verifications, printer, mystery_fn)
 
-    verification_result = verify(config, llm_wo_tool, messages, verifications, printer, mystery_fn)
+    except (UnprocessableEntityError, MsgLimitException, NoToolException, InvalidLLMOutputError, ValidationError) as e:
+        printer.print(e)
+        verification_result = type(e).__name__
+        tool_call_count = None
 
     time_taken = (datetime.now() - start_time).total_seconds()
     attempt_data = {"run_id": run_id,
@@ -119,17 +123,16 @@ def rfn(config, llm, cursor, run_id, acc, mystery_fn):
     failures = []
     loop_index = 0
     while not has_n_duplicates(required_wins, scores):
-        try:
-            result = interrogate_and_verify(config, llm_w_tool, llm_wo_tool, cursor, run_id, loop_index, mystery_fn)
-            scores.append(result)
-            if not result:
+        result = interrogate_and_verify(config, llm_w_tool, llm_wo_tool, cursor, run_id, loop_index, mystery_fn)
+        match result:
+            case True:
+                scores.append(True)
+            case False:
+                scores.append(False)
                 failures.append("wrong answer")
-
-        except (UnprocessableEntityError, MsgLimitException, NoToolException, InvalidLLMOutputError, ValidationError) as e:
-            # these errors are considered to be the LLM's fault, so it will not get any points awarded
-            print(e)
-            scores.append(False)
-            failures.append(type(e).__name__)
+            case _:
+                scores.append(False)
+                failures.append(result)
 
         loop_index += 1
 
