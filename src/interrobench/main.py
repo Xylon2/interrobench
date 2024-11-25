@@ -120,29 +120,23 @@ def rfn(config, llm, cursor, run_id, acc, mystery_fn):
     required_wins = math.ceil(config["best-of"] / 2)
 
     scores = []
-    failures = []
     loop_index = 0
     while not has_n_duplicates(required_wins, scores):
         result = interrogate_and_verify(config, llm_w_tool, llm_wo_tool, cursor, run_id, loop_index, mystery_fn)
-        match result:
-            case True:
-                scores.append(True)
-            case False:
-                scores.append(False)
-                failures.append("wrong answer")
-            case _:
-                scores.append(False)
-                failures.append(result)
+        if result == True:
+            scores.append(True)
+        else:
+            scores.append(False)
 
         loop_index += 1
 
     if most_common_element(scores):  # if more True than False
-        print("\n### SYSTEM: best of", config["best-of"], "passed after", len(scores), "runs")
-        return update_in(acc, ["score"], lambda n: n + 1)
+        print("\n### SYSTEM: best of", config["best-of"], "passed after", len(scores), "attempts")
+        return acc + 1
 
     else:
-        print("\n### SYSTEM: best of", config["best-of"], "failed after", len(scores), "runs")
-        return update_in(acc, ["wrong"], lambda xs: xs + [(name, set(failures))])
+        print("\n### SYSTEM: best of", config["best-of"], "failed after", len(scores), "attempts")
+        return acc
 
 def main():
     config_non_sensitive = load_config("resources/config.yaml")
@@ -162,7 +156,7 @@ def main():
                 "config": json.dumps(config_non_sensitive),
                 "datetime_start": start_time.strftime('%Y-%m-%d %H:%M:%S')
                 }
-    
+
     runs = Table("runs")
     insert_query = Query.into(runs).columns(*run_data.keys()).insert(*run_data.values())
     cursor.execute(str(insert_query) + " RETURNING id")
@@ -198,22 +192,36 @@ def main():
         print("SHORT_TEST")
         interrogees_[:] = interrogees_[-3:]
 
-    test_results = reduce(lambda a, b: rfn(config, llm, cursor, run_id, a, b), interrogees_, {"score": 0, "wrong": []})
+    score = reduce(lambda a, b: rfn(config, llm, cursor, run_id, a, b), interrogees_, 0)
 
     print("\n### SYSTEM: tests complete for model `" + model["name"] + "`. Best of", config["best-of"])
-    print("Final score:", test_results["score"], "/", len(interrogees_))
-    print("Percent:", (test_results["score"] * 100) // len(interrogees_))
+    print("Final score:", score, "/", len(interrogees_))
+    print("Percent:", (score * 100) // len(interrogees_))
     print("Wrong answers:")
-    print_aligned_tuples(test_results["wrong"])
+
+    attempts = Table("attempts")
+    get_wrong_query = Query.from_(attempts).select(attempts.function, attempts.result).where(attempts.run_id == run_id).where(attempts.result != 'true')
+
+    cursor.execute(str(get_wrong_query))
+    wrong = cursor.fetchall()
+
+    # we want to print the wrong results per function. so get it from the db
+    wrong_list = []
+    for target_function in {t[0] for t in wrong}:
+        results = [result for function, result in wrong if function == target_function]
+
+        wrong_list.append((target_function, results))
+
+    print_aligned_tuples(wrong_list)
 
     update_data = {"total_run_time": (datetime.now() - start_time).total_seconds(),
-                   "final_score": json.dumps({"numerator": test_results["score"], "denominator": len(interrogees_)}),
-                   "score_percent": (test_results["score"] * 100) // len(interrogees_)}
+                   "final_score": json.dumps({"numerator": score, "denominator": len(interrogees_)}),
+                   "score_percent": (score * 100) // len(interrogees_)}
 
     for key, value in update_data.items():
         update_query = Query.update(runs).set(key, value).where(runs.id == run_id)
         cursor.execute(str(update_query))
-    
+
     # Why do database libraries require so much boilerplate?
     db_conn.commit()
     cursor.close()
