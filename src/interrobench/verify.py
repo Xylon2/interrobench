@@ -1,6 +1,6 @@
 from itertools import tee
 
-from .shared import prompt_continue
+from .shared import prompt_continue, llm_w_backoff
 
 from typing_extensions import Annotated, TypedDict
 
@@ -63,7 +63,7 @@ def verify(config, llm, messages, verifications, printer, mystery_fn):
         printer.indented_print(map_to_multiline_string(in_))
 
         # amnesia between tests is fine
-        llmout = llm_.invoke(messages + [prompt_maker(in_)])
+        llmout = llm_w_backoff(llm_, messages + [prompt_maker(in_)])
 
         validate_llmout(llmout)
 

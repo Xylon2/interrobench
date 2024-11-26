@@ -38,8 +38,9 @@ A `resources/config.yaml` should look like this (uncomment sections as appropria
 ```
 ---
 
-msg-limit: 30
-best-of: 5
+msg-limit: 30    # the number of requests the tool can use per attempt
+rate-limit: 0.3  # requests per second
+best-of: 5       # how many times is each function tested
 model:
   name: "claude-3-5-haiku-20241022"
   provider: "anthropic"
@@ -81,3 +82,25 @@ Running it should be essentially:
 - set variable DATABASE_URL for alembic and run `alembic upgrade head`
 - type `pytest` to run tests
 - type `interrobench` to run the benchmark
+
+## Database Analysis
+There are two tables in the database;
+- runs stores general information about the test run and it's results
+- attempts stores the logs for the individual attempts and some metadata
+
+### Example queries
+If you know SQL you can do some analysis of the results.
+```
+# find your run
+select datetime_start, id from runs;
+
+# see attempts for a given question
+select * from attempts where run_id = 13 and function = 'triangle third angle';
+```
+
+### Tidyup
+Cascade delete is enabled so if you just delete the run it will clear out the
+linked attempts also:
+```
+delete from runs where id = 13;
+```

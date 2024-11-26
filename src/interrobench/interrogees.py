@@ -193,9 +193,9 @@ interrogees.append({"name": "median of 5",
                     "verifications": [[1, 2, 3, 4, 5], [40, 15, 60, 3, 13], [0, 0, 0, 4, 400]]})
 
 @tool("test_function")
-def circle_circumference(radius: int) -> float:
+def circle_circumference(a: int) -> float:
     """Use this tool to test the mystery function."""
-    return 2 * 3.14159 * radius
+    return 2 * 3.14159 * a
 
 interrogees.append({"name": "circle circumference",
                    "function": circle_circumference,
@@ -404,9 +404,9 @@ interrogees.append({"name": "uppercase string",
                     "verifications": [["hello"], ["world"], ["abc"]]})
 
 @tool("test_function")
-def count_vowels(s: str) -> int:
+def count_vowels(a: str) -> int:
     """Use this tool to test the mystery function."""
-    return sum(1 for char in s.lower() if char in 'aeiou')
+    return sum(1 for char in a.lower() if char in 'aeiou')
 
 interrogees.append({"name": "count vowels",
                    "function": count_vowels,
@@ -431,40 +431,40 @@ interrogees.append({"name": "repeat string",
                     "verifications": [["hello", 3], ["abc", 5]]})
 
 @tool("test_function")
-def minimum_five_chars(s: str) -> str | bool:
+def minimum_five_chars(a: str) -> str | bool:
     """Use this tool to test the mystery function."""
-    return s if len(s) >= 5 else False
+    return a if len(a) >= 5 else False
 
 interrogees.append({"name": "minimum five characters",
                    "function": minimum_five_chars,
                    "verifications": [["hello"], ["cat"], ["python"], [""], ["abcde"]]})
 
 @tool("test_function")
-def delete_second_and_reverse(s: str) -> str:
+def delete_second_and_reverse(a: str) -> str:
     """Use this tool to test the mystery function."""
-    if len(s) < 2:
-        return s
-    return (s[0] + s[2:])[::-1]
+    if len(a) < 2:
+        return a
+    return (a[0] + a[2:])[::-1]
 
 interrogees.append({"name": "delete second letter and reverse",
                    "function": delete_second_and_reverse,
                    "verifications": [["hello"], ["python"], ["test"]]})
 
 @tool("test_function")
-def longest_common_substring(s1: str, s2: str) -> str:
+def longest_common_substring(a: str, b: str) -> str:
     """Use this tool to test the mystery function."""
-    if not s1 or not s2:
+    if not a or not b:
         return ""
-    m = [[0] * (len(s2) + 1) for _ in range(len(s1) + 1)]
+    m = [[0] * (len(b) + 1) for _ in range(len(a) + 1)]
     longest, x_longest = 0, 0
-    for x in range(len(s1)):
-        for y in range(len(s2)):
-            if s1[x] == s2[y]:
+    for x in range(len(a)):
+        for y in range(len(b)):
+            if a[x] == b[y]:
                 m[x + 1][y + 1] = m[x][y] + 1
                 if m[x + 1][y + 1] > longest:
                     longest = m[x + 1][y + 1]
                     x_longest = x + 1
-    return s1[x_longest - longest:x_longest]
+    return a[x_longest - longest:x_longest]
 
 interrogees.append({"name": "longest common substring",
                    "function": longest_common_substring,

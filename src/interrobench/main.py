@@ -15,6 +15,7 @@ from langchain_google_vertexai import ChatVertexAI
 from langchain_xai import ChatXAI
 from langchain_groq import ChatGroq
 from langchain_cohere import ChatCohere
+from langchain_core.rate_limiters import InMemoryRateLimiter
 from cohere import UnprocessableEntityError
 
 # other modules
@@ -162,27 +163,45 @@ def main():
     cursor.execute(str(insert_query) + " RETURNING id")
     run_id = cursor.fetchone()[0]
 
+    rate_limiter = InMemoryRateLimiter(
+        requests_per_second=float(config["rate-limit"]),
+        check_every_n_seconds=0.1,
+        max_bucket_size=10,
+    )
+
     # prepare the appropriate runnable
     # https://python.langchain.com/docs/integrations/providers/
     match model["provider"]:
         case "openai":
-            llm = ChatOpenAI(model=model["name"], api_key=api_keys["openai"])
+            llm = ChatOpenAI(model=model["name"],
+                             api_key=api_keys["openai"],
+                             rate_limiter=rate_limiter)
         case "anthropic":
-            llm = ChatAnthropic(model=model["name"], api_key=api_keys["anthropic"])
+            llm = ChatAnthropic(model=model["name"],
+                                api_key=api_keys["anthropic"],
+                                rate_limiter=rate_limiter)
         case "cohere":
             os.environ["COHERE_API_KEY"] = api_keys["cohere"]
-            llm = ChatCohere(model=model["name"], co_api_key=api_keys["cohere"])
+            llm = ChatCohere(model=model["name"],
+                             co_api_key=api_keys["cohere"],
+                             rate_limiter=rate_limiter)
         case "xai":
-            llm = ChatXAI(model=model["name"], xai_api_key=api_keys["xai"])
+            llm = ChatXAI(model=model["name"],
+                          xai_api_key=api_keys["xai"],
+                          rate_limiter=rate_limiter)
         case "groq":
-            llm = ChatGroq(model=model["name"], api_key=api_keys["groq"])
+            llm = ChatGroq(model=model["name"],
+                           api_key=api_keys["groq"],
+                           rate_limiter=rate_limiter)
         case "google":
             # to make this work, I had to run these in bash:
             # $ gcloud config set project gcp-project-name
             # $ gcloud auth application-default login
             #
             # actually, it still doesn't seem to work correctly. may be a langchain bug
-            llm = ChatVertexAI(model=model["name"], api_key=api_keys["google"])
+            llm = ChatVertexAI(model=model["name"],
+                               api_key=api_keys["google"],
+                               rate_limiter=rate_limiter)
 
     if "easy-tests-only" in config["debug"]:
         print("SHORT_TEST")

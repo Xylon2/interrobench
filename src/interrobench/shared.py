@@ -1,6 +1,8 @@
+import time
+import sys
 import shutil
 import textwrap
-import sys
+from anthropic import InternalServerError
 
 class AbortException(Exception):
     """Custom exception for user aborting the operation."""
@@ -69,3 +71,15 @@ class AccumulatingPrinter:
         Returns the accumulated megastring.
         """
         return self.megastring
+
+def llm_w_backoff(llm, messages):
+    try:
+        return llm.invoke(messages)
+
+    except InternalServerError as e:
+        # anthropic raises these errors when "Overloaded"
+        print()
+        print(e)
+        print("\n### SYSTEM: backing off for 1 hour")
+        time.sleep(3600)
+        return llm.invoke(messages)

@@ -1,4 +1,4 @@
-from .shared import prompt_continue
+from .shared import prompt_continue, llm_w_backoff
 
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.prompts import ChatPromptTemplate
@@ -42,7 +42,7 @@ def interrogate(config, llm, printer, mystery_fn):
 
     for count in range(0, msg_limit):
         # send the chat.
-        llmout = llm.invoke(messages)
+        llmout = llm_w_backoff(llm, messages)
 
         # append for convo history
         messages.append(llmout)  # it's an AIMessage object
