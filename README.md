@@ -85,7 +85,7 @@ Running it should be essentially:
 - make a virtualenv and activate it
 - install interrobench into your virtualenv with `pip install -e .`
 - run `alembic upgrade head` to create the database tables
-- type `pytest` to run tests
+- to run the project tests `pip install interrobench[dev]` and `python -m pytest` 
 - type `interrobench` to run the benchmark
 
 ## Database Analysis
