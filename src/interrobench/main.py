@@ -88,6 +88,7 @@ def interrogate_and_verify(config, llm_w_tool, llm_wo_tool, cursor, run_id, atte
         verification_result = verify(config, llm_wo_tool, messages, verifications, printer, mystery_fn)
 
     except (UnprocessableEntityError, MsgLimitException, NoToolException, InvalidLLMOutputError, ValidationError) as e:
+        printer.print("\n### SYSTEM: The following Error occured:")
         printer.print(e)
         verification_result = type(e).__name__
         tool_call_count = None
