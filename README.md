@@ -47,25 +47,16 @@ A `resources/config.yaml` should look like this (uncomment sections as appropria
 msg-limit: 30    # the number of requests the tool can use per attempt
 rate-limit: 0.3  # requests per second
 best-of: 5       # how many times is each function tested
-model:
-  name: "claude-3-5-haiku-20241022"
-  provider: "anthropic"
-#model:
-#  name: "gpt-4o-mini"
-#  provider: "openai"
-#model:
-#  name: "grok-beta"
-#  provider: "xai"
-#model:
-#  name: "command-r-plus"
-#  provider: "cohere"
-  
+model: {name: "claude-3-5-haiku-20241022", provider: "anthropic"}
+#model: {name: "gpt-4o-mini-2024-07-18", provider: "openai"}
+#model: {name: "grok-beta", provider: "xai"}
+#model: {name: "command-r-plus", provider: "cohere"}
+
 debug:
 #  - prompt-each-interrogation
 #  - prompt-each-message
 #  - easy-problems-only
 #  - hard-problems-only
-
 ```
 
 And a `resources/credentials.yaml` containing your db credentials and API keys:
@@ -78,7 +69,6 @@ api-keys:
   openai: ""
   xai: ""
   cohere: ""
-
 ```
 
 Running it should be essentially:
