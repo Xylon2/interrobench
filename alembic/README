@@ -1,1 +1,0 @@
-Requires environment variable DATABASE_URL=postgresql+psycopg2://user:password@localhost/dbname
