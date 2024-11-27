@@ -57,8 +57,8 @@ model:
 debug:
 #  - prompt-each-interrogation
 #  - prompt-each-message
-#  - easy-tests-only
-#  - hard-tests-only
+#  - easy-problems-only
+#  - hard-problems-only
 
 ```
 

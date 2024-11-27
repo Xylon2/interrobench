@@ -204,17 +204,17 @@ def main():
                                api_key=api_keys["google"],
                                rate_limiter=rate_limiter)
 
-    if "easy-tests-only" in config["debug"]:
+    if "easy-problems-only" in config["debug"]:
         print("SHORT_TEST")
         interrogees_[:] = interrogees_[:3]
 
-    elif "hard-tests-only" in config["debug"]:
+    elif "hard-problems-only" in config["debug"]:
         print("SHORT_TEST")
         interrogees_[:] = interrogees_[-3:]
 
     score = reduce(lambda a, b: rfn(config, llm, cursor, run_id, a, b), interrogees_, 0)
 
-    print("\n### SYSTEM: tests complete for model `" + model["name"] + "`. Best of", config["best-of"])
+    print("\n### SYSTEM: run complete for model `" + model["name"] + "`. Best of", config["best-of"])
     print("Final score:", score, "/", len(interrogees_))
     print("Percent:", (score * 100) // len(interrogees_))
     print("Wrong answers:")

@@ -62,7 +62,7 @@ def verify(config, llm, messages, verifications, printer, mystery_fn):
         printer.print("\n### SYSTEM: inputs:")
         printer.indented_print(map_to_multiline_string(in_))
 
-        # amnesia between tests is fine
+        # amnesia between verifications is fine
         llmout = llm_w_backoff(llm_, messages + [prompt_maker(in_)])
 
         validate_llmout(llmout)
