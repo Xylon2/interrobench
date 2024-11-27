@@ -21,14 +21,20 @@ If you want to see the results: see [The LeaderBoard](https://interrobench.com/)
 ## Running
 
 If you want to run this benchmark yourself, you will need:
-- an account and API key for whichever LLM provider you want to use
-- a computer to install python and postgres on. postgres is how it stores analytics for each run
+- An account and API key for whichever LLM provider you want to use
+- A computer to install Python and PostgreSQL on. Postgres is how it stores analytics for each run
 
-First checkout this code.
+Checkout this code.
 
 Install these:
-- postgresql-server and client
-- python3, pip and virtualenv
+- PostgreSQL
+  - server
+  - client
+  - libpq-dev
+- Python3:
+  - runtime
+  - pip
+  - virtualenv
 
 Create a postgresql database and user.
 
@@ -77,9 +83,8 @@ api-keys:
 
 Running it should be essentially:
 - make a virtualenv and activate it
-- use pip to install the deps from `requirements.txt`
 - install interrobench into your virtualenv with `pip install -e .`
-- set variable DATABASE_URL for alembic and run `alembic upgrade head`
+- run `alembic upgrade head` to create the database tables
 - type `pytest` to run tests
 - type `interrobench` to run the benchmark
 

@@ -6,8 +6,11 @@ from sqlalchemy import pool
 
 from alembic import context
 
+from interrobench.main import load_config
+
 # Retrieve the database URL from an environment variable
-DATABASE_URL = os.environ.get("DATABASE_URL")
+#DATABASE_URL = os.environ.get("DATABASE_URL")
+DATABASE_URL = load_config("resources/credentials.yaml")["postgres-url"]
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
