@@ -65,7 +65,7 @@ def interrogate(config, llm, printer, mystery_fn):
 
                 tool_call_count += 1
 
-            prompt_continue(config, "prompt-each-message")
+            prompt_continue(config, "pause-each-message")
 
         # LLM didn't call the tool, so it's time to run the verifications
         else:

@@ -55,7 +55,7 @@ def verify(config, llm, messages, verifications, printer, mystery_fn):
         printer.print()
         printer.indented_print("`" + str(llmout.expected_output) + "`\n")
 
-        prompt_continue(config, "prompt-each-message")
+        prompt_continue(config, "pause-each-message")
 
         if llmout.expected_output == out:
             printer.print("\n### SYSTEM: CORRECT")

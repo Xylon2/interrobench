@@ -111,7 +111,7 @@ def rfn(config, llm, cursor, run_id, acc, mystery_fn):
     name = mystery_fn["name"]
     function = mystery_fn["function"]
 
-    prompt_continue(config, "prompt-each-interrogation")
+    prompt_continue(config, "pause-each-interrogation")
     print("\n######################################################")
     print("### SYSTEM: testing function", name)
     print("######################################################")

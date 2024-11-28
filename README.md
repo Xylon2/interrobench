@@ -51,10 +51,11 @@ model: {name: "claude-3-5-haiku-20241022", provider: "anthropic"}
 #model: {name: "gpt-4o-mini-2024-07-18", provider: "openai"}
 #model: {name: "grok-beta", provider: "xai"}
 #model: {name: "command-r-plus", provider: "cohere"}
+#model: {name: "gemini-1.5-flash", provider: "google"}
 
 debug:
-#  - prompt-each-interrogation
-#  - prompt-each-message
+#  - pause-each-interrogation
+#  - pause-each-message
 #  - easy-problems-only
 #  - hard-problems-only
 ```
