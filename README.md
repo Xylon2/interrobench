@@ -50,8 +50,9 @@ best-of: 5       # how many times is each function tested
 model: {name: "claude-3-5-haiku-20241022", provider: "anthropic"}
 #model: {name: "gpt-4o-mini-2024-07-18", provider: "openai"}
 #model: {name: "grok-beta", provider: "xai"}
-#model: {name: "command-r-plus", provider: "cohere"}
 #model: {name: "gemini-1.5-flash", provider: "google"}
+#model: {name: "command-r-plus", provider: "cohere"}
+#model: {name: "llama3-groq-70b-8192-tool-use-preview", provider: "groq"}
 
 debug:
 #  - pause-each-interrogation
