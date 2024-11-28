@@ -2,33 +2,18 @@ from itertools import tee
 
 from .shared import prompt_continue, llm_w_backoff
 
-from typing_extensions import Annotated, TypedDict
-
-class InvalidLLMOutputError(Exception):
-    """Custom exception for invalid LLM output."""
-    def __init__(self, message):
-        super().__init__(message)
-
-def validate_llmout(llmout):
-    """Check if `llmout` is a dict with the required keys"""
-    if not isinstance(llmout, dict):
-        raise InvalidLLMOutputError("llmout must be a dictionary.")
-
-    required_keys = {"thoughts", "expected_output"}
-    if not required_keys.issubset(llmout.keys()):
-        missing_keys = required_keys - llmout.keys()
-        raise InvalidLLMOutputError(f"Missing keys in llmout: {', '.join(missing_keys)}")
+from pydantic import BaseModel, Field
 
 def map_to_multiline_string(data: dict) -> str:
     "print the input arguments in a nice string format for the LLM"
     return "\n".join(f"{key}: {value}" for key, value in data.items())
 
 def make_schema(eo_type):
-    class Prediction(TypedDict):
+    class Prediction(BaseModel):
         """Prediction of the function output."""
 
-        thoughts: Annotated[str, ..., "explain your workings"]
-        expected_output: Annotated[eo_type, ..., "the expected output from the function"]
+        thoughts: str = Field(description="explain your workings")
+        expected_output: eo_type = Field(description="the expected output from the function")
 
     return Prediction
 
@@ -65,16 +50,14 @@ def verify(config, llm, messages, verifications, printer, mystery_fn):
         # amnesia between verifications is fine
         llmout = llm_w_backoff(llm_, messages + [prompt_maker(in_)])
 
-        validate_llmout(llmout)
-
         printer.print("\n--- LLM ---")
-        printer.indented_print(llmout["thoughts"], "\n")
+        printer.indented_print(llmout.thoughts, "\n")
         printer.print()
-        printer.indented_print("`" + str(llmout["expected_output"]) + "`\n")
+        printer.indented_print("`" + str(llmout.expected_output) + "`\n")
 
         prompt_continue(config, "prompt-each-message")
 
-        if llmout["expected_output"] == out:
+        if llmout.expected_output == out:
             printer.print("\n### SYSTEM: CORRECT")
         else:
             printer.print("\n### SYSTEM: WRONG")
