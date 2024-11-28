@@ -24,6 +24,8 @@ If you want to run this benchmark yourself, you will need:
 - An account and API key for whichever LLM provider you want to use
 - A computer to install Python and PostgreSQL on. Postgres is how it stores analytics for each run
 
+General instructions follow. Alternatively you may watch this video for Ubuntu instructions: [Installing and Running InterroBench on Ubuntu](https://youtu.be/gqIXEt2TBoI).
+
 Checkout this code.
 
 Install these:
