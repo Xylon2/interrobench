@@ -383,7 +383,7 @@ def concatenate(a: str, b: str) -> str:
 
 interrogees.append({"name": "concatenate",
                     "function": concatenate,
-                    "verifications": [["banana", "potato"], ["bar", "foo"]]})
+                    "verifications": [["banana", "potato"], ["fun", "run"]]})
 
 @tool("test_function")
 def reverse_string(a: str) -> str:
@@ -488,7 +488,7 @@ def contains_substring(a: str, b: str) -> bool:
 
 interrogees.append({"name": "contains substring",
                     "function": contains_substring,
-                    "verifications": [["hello world", "world"], ["foobar", "bar"], ["abc", "d"]]})
+                    "verifications": [["fresh potato", "pot"], ["ear", "earth"], ["abc", "d"]]})
 
 @tool("test_function")
 def crack_lock(a: int, b: int, c: int, d: int) -> int | str:
