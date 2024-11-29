@@ -17,6 +17,7 @@ from langchain_groq import ChatGroq
 from langchain_cohere import ChatCohere
 from langchain_core.rate_limiters import InMemoryRateLimiter
 from cohere import UnprocessableEntityError
+from groq import BadRequestError
 
 # other modules
 from .interrogees import interrogees_
@@ -87,7 +88,8 @@ def interrogate_and_verify(config, llm_w_tool, llm_wo_tool, cursor, run_id, atte
         printer.print("\n### SYSTEM: verifying function", name)
         verification_result = verify(config, llm_wo_tool, messages, verifications, printer, mystery_fn)
 
-    except (UnprocessableEntityError, MsgLimitException, NoToolException, ValidationError) as e:
+    except (UnprocessableEntityError, MsgLimitException, NoToolException, ValidationError, BadRequestError) as e:
+        # these errors are considered to be the LLM's fault, so it will not get any points awarded
         printer.print("\n### SYSTEM: The following Error occured:")
         printer.print(e)
         verification_result = type(e).__name__
