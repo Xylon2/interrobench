@@ -196,7 +196,8 @@ def main():
             # $ gcloud auth application-default login
             llm = ChatVertexAI(model=model["name"],
                                api_key=api_keys["google"],
-                               rate_limiter=rate_limiter)
+                               rate_limiter=rate_limiter,
+                               max_retries=3)
         case "groq":
             llm = ChatGroq(model=model["name"],
                            api_key=api_keys["groq"],
