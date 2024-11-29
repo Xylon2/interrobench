@@ -6,9 +6,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [4.0.0]
-### Added
-- make google and groq providers work
-
 ### Fixed
 - remove overly common words from verifications
 
