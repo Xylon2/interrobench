@@ -17,12 +17,13 @@ from langchain_groq import ChatGroq
 from langchain_cohere import ChatCohere
 from langchain_core.rate_limiters import InMemoryRateLimiter
 from cohere import UnprocessableEntityError
+from groq import BadRequestError
 
 # other modules
 from .interrogees import interrogees_
 from .shared import prompt_continue, AccumulatingPrinter
 from .interrogate import interrogate, NoToolException, MsgLimitException
-from .verify import verify, InvalidLLMOutputError
+from .verify import verify
 
 # db
 import psycopg2
@@ -87,7 +88,8 @@ def interrogate_and_verify(config, llm_w_tool, llm_wo_tool, cursor, run_id, atte
         printer.print("\n### SYSTEM: verifying function", name)
         verification_result = verify(config, llm_wo_tool, messages, verifications, printer, mystery_fn)
 
-    except (UnprocessableEntityError, MsgLimitException, NoToolException, InvalidLLMOutputError, ValidationError) as e:
+    except (UnprocessableEntityError, MsgLimitException, NoToolException, ValidationError, BadRequestError) as e:
+        # these errors are considered to be the LLM's fault, so it will not get any points awarded
         printer.print("\n### SYSTEM: The following Error occured:")
         printer.print(e)
         verification_result = type(e).__name__
@@ -111,7 +113,7 @@ def rfn(config, llm, cursor, run_id, acc, mystery_fn):
     name = mystery_fn["name"]
     function = mystery_fn["function"]
 
-    prompt_continue(config, "prompt-each-interrogation")
+    prompt_continue(config, "pause-each-interrogation")
     print("\n######################################################")
     print("### SYSTEM: testing function", name)
     print("######################################################")
@@ -190,19 +192,18 @@ def main():
             llm = ChatXAI(model=model["name"],
                           xai_api_key=api_keys["xai"],
                           rate_limiter=rate_limiter)
-        case "groq":
-            llm = ChatGroq(model=model["name"],
-                           api_key=api_keys["groq"],
-                           rate_limiter=rate_limiter)
         case "google":
             # to make this work, I had to run these in bash:
             # $ gcloud config set project gcp-project-name
             # $ gcloud auth application-default login
-            #
-            # actually, it still doesn't seem to work correctly. may be a langchain bug
             llm = ChatVertexAI(model=model["name"],
                                api_key=api_keys["google"],
-                               rate_limiter=rate_limiter)
+                               rate_limiter=rate_limiter,
+                               max_retries=3)
+        case "groq":
+            llm = ChatGroq(model=model["name"],
+                           api_key=api_keys["groq"],
+                           rate_limiter=rate_limiter)
 
     if "easy-problems-only" in config["debug"]:
         print("SHORT_TEST")

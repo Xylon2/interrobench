@@ -3,6 +3,7 @@ import sys
 import shutil
 import textwrap
 from anthropic import InternalServerError
+from google.api_core.exceptions import ResourceExhausted
 
 class AbortException(Exception):
     """Custom exception for user aborting the operation."""
@@ -82,4 +83,13 @@ def llm_w_backoff(llm, messages):
         print(e)
         print("\n### SYSTEM: backing off for 1 hour")
         time.sleep(3600)
+        return llm.invoke(messages)
+
+    except ResourceExhausted as e:
+        # Google's rate limits are stricter than any other provider, but they
+        # seem to reset quickly
+        print()
+        print(e)
+        print("\n### SYSTEM: backing off for 5 minutes")
+        time.sleep(300)
         return llm.invoke(messages)

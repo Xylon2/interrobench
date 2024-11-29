@@ -374,7 +374,7 @@ def remove_last_letter(a: str) -> str:
 
 interrogees.append({"name": "remove last letter",
                     "function": remove_last_letter,
-                    "verifications": [["hello"], ["world"]]})
+                    "verifications": [["whimsical"], ["vortex"]]})
 
 @tool("test_function")
 def concatenate(a: str, b: str) -> str:
@@ -383,7 +383,7 @@ def concatenate(a: str, b: str) -> str:
 
 interrogees.append({"name": "concatenate",
                     "function": concatenate,
-                    "verifications": [["banana", "potato"], ["bar", "foo"]]})
+                    "verifications": [["banana", "potato"], ["fun", "run"]]})
 
 @tool("test_function")
 def reverse_string(a: str) -> str:
@@ -392,7 +392,7 @@ def reverse_string(a: str) -> str:
 
 interrogees.append({"name": "reverse string",
                     "function": reverse_string,
-                    "verifications": [["hello"], ["world"], ["abcde"]]})
+                    "verifications": [["whimsical"], ["vortex"], ["abcde"]]})
 
 @tool("test_function")
 def uppercase_string(a: str) -> str:
@@ -401,7 +401,7 @@ def uppercase_string(a: str) -> str:
 
 interrogees.append({"name": "uppercase string",
                     "function": uppercase_string,
-                    "verifications": [["hello"], ["world"], ["abc"]]})
+                    "verifications": [["whimsical"], ["vortex"], ["abc"]]})
 
 @tool("test_function")
 def count_vowels(a: str) -> int:
@@ -410,7 +410,7 @@ def count_vowels(a: str) -> int:
 
 interrogees.append({"name": "count vowels",
                    "function": count_vowels,
-                   "verifications": [["hello"], ["aardvark"], ["rhythm"], ["Python"]]})
+                   "verifications": [["whimsical"], ["aardvark"], ["rhythm"], ["Python"]]})
 
 @tool("test_function")
 def string_length(a: str) -> int:
@@ -419,7 +419,7 @@ def string_length(a: str) -> int:
 
 interrogees.append({"name": "string length",
                     "function": string_length,
-                    "verifications": [["hello"], ["world"], ["abcdefg"]]})
+                    "verifications": [["whimsical"], ["vortex"], ["abcdefg"]]})
 
 @tool("test_function")
 def repeat_string(a: str, b: int) -> str:
@@ -428,7 +428,7 @@ def repeat_string(a: str, b: int) -> str:
 
 interrogees.append({"name": "repeat string",
                     "function": repeat_string,
-                    "verifications": [["hello", 3], ["abc", 5]]})
+                    "verifications": [["whimsical", 3], ["abc", 5]]})
 
 @tool("test_function")
 def minimum_five_chars(a: str) -> str | bool:
@@ -437,7 +437,7 @@ def minimum_five_chars(a: str) -> str | bool:
 
 interrogees.append({"name": "minimum five characters",
                    "function": minimum_five_chars,
-                   "verifications": [["hello"], ["cat"], ["python"], [""], ["abcde"]]})
+                   "verifications": [["azure"], ["cat"], ["python"], [""], ["abcde"]]})
 
 @tool("test_function")
 def delete_second_and_reverse(a: str) -> str:
@@ -448,7 +448,7 @@ def delete_second_and_reverse(a: str) -> str:
 
 interrogees.append({"name": "delete second letter and reverse",
                    "function": delete_second_and_reverse,
-                   "verifications": [["hello"], ["python"], ["test"]]})
+                   "verifications": [["whimsical"], ["python"], ["test"]]})
 
 @tool("test_function")
 def longest_common_substring(a: str, b: str) -> str:
@@ -468,7 +468,7 @@ def longest_common_substring(a: str, b: str) -> str:
 
 interrogees.append({"name": "longest common substring",
                    "function": longest_common_substring,
-                   "verifications": [["hello", "world"], ["python", "typhoon"], ["abcde", "cdefg"], ["cat", "hat"], ["", "test"]]})
+                   "verifications": [["whimsical", "world"], ["python", "typhoon"], ["abcde", "cdefg"], ["cat", "hat"], ["", "test"]]})
 
 
 # hard questions
@@ -479,7 +479,7 @@ def count_es(a: str) -> str:
 
 interrogees.append({"name": "count e's",
                     "function": count_es,
-                    "verifications": [["hello"], ["world"], ["the quick brown fox jumped over the lazy dog"]]})
+                    "verifications": [["tangent"], ["wistful"], ["the quick brown fox jumped over the lazy dog"]]})
 
 @tool("test_function")
 def contains_substring(a: str, b: str) -> bool:
@@ -488,7 +488,7 @@ def contains_substring(a: str, b: str) -> bool:
 
 interrogees.append({"name": "contains substring",
                     "function": contains_substring,
-                    "verifications": [["hello world", "world"], ["foobar", "bar"], ["abc", "d"]]})
+                    "verifications": [["fresh potato", "pot"], ["ear", "earth"], ["abc", "d"]]})
 
 @tool("test_function")
 def crack_lock(a: int, b: int, c: int, d: int) -> int | str:
