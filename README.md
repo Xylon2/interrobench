@@ -97,6 +97,28 @@ select datetime_start, id from runs;
 select * from attempts where run_id = 13 and function = 'triangle third angle';
 ```
 
+If you want to see a simple pass/fail result for each question for a
+given run, you may notice it's not straightforward to do because we
+have a table for individual attempts, not for the overall result after
+the best of 5. But you can use this query:
+```
+SELECT
+    function,
+    CASE
+        WHEN COUNT(CASE WHEN result = 'true' THEN 1 END) >= COUNT(CASE WHEN result != 'true' THEN 1 END)
+        THEN true
+        ELSE false
+    END AS predominant_result
+FROM
+    attempts
+WHERE
+    run_id = EDITME
+GROUP BY
+    function
+ORDER BY
+    function;
+```
+
 ### Tidyup
 Cascade delete is enabled so if you just delete the run it will clear out the
 linked attempts also:
