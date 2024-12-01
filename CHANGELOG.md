@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [5.0.0]
+### Added
+- Count API calls
+
+### Changed
+- New rate limiting system
+- Prompts changed to make it easier for stupider models
+
 ## [4.0.0]
 ### Fixed
 - remove overly common words from verifications

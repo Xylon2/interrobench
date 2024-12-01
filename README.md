@@ -47,7 +47,7 @@ A `resources/config.yaml` should look like this (uncomment sections as appropria
 ---
 
 msg-limit: 30    # the number of requests the tool can use per attempt
-rate-limit: 0.3  # requests per second
+rate-limit: 5    # seconds between requests
 best-of: 5       # how many times is each function tested
 model: {name: "claude-3-5-haiku-20241022", provider: "anthropic"}
 #model: {name: "gpt-4o-mini-2024-07-18", provider: "openai"}

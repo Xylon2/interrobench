@@ -1,4 +1,4 @@
-from .shared import prompt_continue, llm_w_backoff
+from .shared import prompt_continue
 
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.prompts import ChatPromptTemplate
@@ -16,9 +16,9 @@ initial_messages = [
 
 You are provided with a mystery function which you will \"interrogate\" to try to determine what it does. Use the provided tool to do this.
 
-At the same time you will tell the user what you are doing.
-
 Once you are confident you know what the function does, you will inform the user.
+
+n.b. it is your job to pick inputs for the mystery function. Do not ask the user to provide you with parameters to test. Test the function pro-actively with the provided tool until you work out what the mystery function does.
 """),
     HumanMessage(content="""Hi. I have a mystery function and I want to find out what it does.
 
@@ -28,7 +28,7 @@ I would like you to test my function using the provided tool until you think you
 def print_tool_call(printer, tool_call, result):
     printer.indented_print(", ".join(map(str, tool_call["args"].values())), "→", result.content)
 
-def interrogate(config, llm, printer, mystery_fn):
+def interrogate(config, llm, rate_limiter, printer, mystery_fn):
     msg_limit = config["msg-limit"]
     debug = config["debug"]
 
@@ -42,7 +42,7 @@ def interrogate(config, llm, printer, mystery_fn):
 
     for count in range(0, msg_limit):
         # send the chat.
-        llmout = llm_w_backoff(llm, messages)
+        llmout = rate_limiter(llm, messages)
 
         # append for convo history
         messages.append(llmout)  # it's an AIMessage object

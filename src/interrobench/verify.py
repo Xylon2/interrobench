@@ -1,6 +1,6 @@
 from itertools import tee
 
-from .shared import prompt_continue, llm_w_backoff
+from .shared import prompt_continue
 
 from pydantic import BaseModel, Field
 
@@ -29,7 +29,7 @@ You no-longer have access to the tool because I am testing if you have got it ri
 Please respond in JSON with two keys: \"thoughts\" and \"expected_output\".
 The expected_output key will be used automatically to check your results so only include the output you expect from the function. And use the thoughts key to explain your workings."""
 
-def verify(config, llm, messages, verifications, printer, mystery_fn):
+def verify(config, llm, rate_limiter, messages, verifications, printer, mystery_fn):
     # We will loop through the verifications. For each, we prompt the LLM and
     # check it's response. The first one it gets wrong, we abort.
 
@@ -48,7 +48,7 @@ def verify(config, llm, messages, verifications, printer, mystery_fn):
         printer.indented_print(map_to_multiline_string(in_))
 
         # amnesia between verifications is fine
-        llmout = llm_w_backoff(llm_, messages + [prompt_maker(in_)])
+        llmout = rate_limiter(llm_, messages + [prompt_maker(in_)])
 
         printer.print("\n--- LLM ---")
         printer.indented_print(llmout.thoughts, "\n")

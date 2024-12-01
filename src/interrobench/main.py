@@ -15,13 +15,12 @@ from langchain_google_vertexai import ChatVertexAI
 from langchain_xai import ChatXAI
 from langchain_groq import ChatGroq
 from langchain_cohere import ChatCohere
-from langchain_core.rate_limiters import InMemoryRateLimiter
 from cohere import UnprocessableEntityError
 from groq import BadRequestError
 
 # other modules
 from .interrogees import interrogees_
-from .shared import prompt_continue, AccumulatingPrinter
+from .shared import prompt_continue, AccumulatingPrinter, LLMRateLimiter
 from .interrogate import interrogate, NoToolException, MsgLimitException
 from .verify import verify
 
@@ -72,21 +71,22 @@ def most_common_element(bool_list):
     else:
         raise EqualCountError("True and False occur equally in the list.")
 
-def interrogate_and_verify(config, llm_w_tool, llm_wo_tool, cursor, run_id, attempt_index, mystery_fn):
+def interrogate_and_verify(config, llm_w_tool, llm_wo_tool, rate_limiter, cursor, run_id, attempt_index, mystery_fn):
     name = mystery_fn["name"]
     verifications = mystery_fn["verifications"]
 
     start_time = datetime.now()
+    start_api_calls = rate_limiter.total_call_count
 
     # setup the printer
     printer = AccumulatingPrinter()
 
     try:
         printer.print("\n### SYSTEM: interrogating function", name)
-        messages, tool_call_count = interrogate(config, llm_w_tool, printer, mystery_fn)
+        messages, tool_call_count = interrogate(config, llm_w_tool, rate_limiter, printer, mystery_fn)
 
         printer.print("\n### SYSTEM: verifying function", name)
-        verification_result = verify(config, llm_wo_tool, messages, verifications, printer, mystery_fn)
+        verification_result = verify(config, llm_wo_tool, rate_limiter, messages, verifications, printer, mystery_fn)
 
     except (UnprocessableEntityError, MsgLimitException, NoToolException, ValidationError, BadRequestError) as e:
         # these errors are considered to be the LLM's fault, so it will not get any points awarded
@@ -102,14 +102,15 @@ def interrogate_and_verify(config, llm_w_tool, llm_wo_tool, cursor, run_id, atte
                     "attempt_index": attempt_index,
                     "time_taken": time_taken,
                     "tool_calls": tool_call_count,
-                    "complete_log": printer.retrieve()}
+                    "complete_log": printer.retrieve(),
+                    "api_calls": rate_limiter.total_call_count - start_api_calls}
 
     insert_query = Query.into(Table("attempts")).columns(*attempt_data.keys()).insert(*attempt_data.values())
     cursor.execute(str(insert_query))
 
     return verification_result
 
-def rfn(config, llm, cursor, run_id, acc, mystery_fn):
+def rfn(config, llm, rate_limiter, cursor, run_id, acc, mystery_fn):
     name = mystery_fn["name"]
     function = mystery_fn["function"]
 
@@ -126,7 +127,7 @@ def rfn(config, llm, cursor, run_id, acc, mystery_fn):
     scores = []
     loop_index = 0
     while not has_n_duplicates(required_wins, scores):
-        result = interrogate_and_verify(config, llm_w_tool, llm_wo_tool, cursor, run_id, loop_index, mystery_fn)
+        result = interrogate_and_verify(config, llm_w_tool, llm_wo_tool, rate_limiter, cursor, run_id, loop_index, mystery_fn)
         if result == True:
             scores.append(True)
         else:
@@ -166,44 +167,32 @@ def main():
     cursor.execute(str(insert_query) + " RETURNING id")
     run_id = cursor.fetchone()[0]
 
-    rate_limiter = InMemoryRateLimiter(
-        requests_per_second=float(config["rate-limit"]),
-        check_every_n_seconds=0.1,
-        max_bucket_size=10,
-    )
-
     # prepare the appropriate runnable
     # https://python.langchain.com/docs/integrations/providers/
     match model["provider"]:
         case "openai":
             llm = ChatOpenAI(model=model["name"],
-                             api_key=api_keys["openai"],
-                             rate_limiter=rate_limiter)
+                             api_key=api_keys["openai"])
         case "anthropic":
             llm = ChatAnthropic(model=model["name"],
-                                api_key=api_keys["anthropic"],
-                                rate_limiter=rate_limiter)
+                                api_key=api_keys["anthropic"])
         case "cohere":
             os.environ["COHERE_API_KEY"] = api_keys["cohere"]
             llm = ChatCohere(model=model["name"],
-                             co_api_key=api_keys["cohere"],
-                             rate_limiter=rate_limiter)
+                             co_api_key=api_keys["cohere"])
         case "xai":
             llm = ChatXAI(model=model["name"],
-                          xai_api_key=api_keys["xai"],
-                          rate_limiter=rate_limiter)
+                          xai_api_key=api_keys["xai"])
         case "google":
             # to make this work, I had to run these in bash:
             # $ gcloud config set project gcp-project-name
             # $ gcloud auth application-default login
             llm = ChatVertexAI(model=model["name"],
                                api_key=api_keys["google"],
-                               rate_limiter=rate_limiter,
                                max_retries=3)
         case "groq":
             llm = ChatGroq(model=model["name"],
-                           api_key=api_keys["groq"],
-                           rate_limiter=rate_limiter)
+                           api_key=api_keys["groq"])
 
     if "easy-problems-only" in config["debug"]:
         print("SHORT_TEST")
@@ -213,7 +202,9 @@ def main():
         print("SHORT_TEST")
         interrogees_[:] = interrogees_[-3:]
 
-    score = reduce(lambda a, b: rfn(config, llm, cursor, run_id, a, b), interrogees_, 0)
+    rate_limiter = LLMRateLimiter(rate_limit_seconds=config['rate-limit'])
+
+    score = reduce(lambda a, b: rfn(config, llm, rate_limiter, cursor, run_id, a, b), interrogees_, 0)
 
     print("\n### SYSTEM: run complete for model `" + model["name"] + "`. Best of", config["best-of"])
     print("Final score:", score, "/", len(interrogees_))
@@ -237,7 +228,8 @@ def main():
 
     update_data = {"total_run_time": (datetime.now() - start_time).total_seconds(),
                    "final_score": json.dumps({"numerator": score, "denominator": len(interrogees_)}),
-                   "score_percent": (score * 100) // len(interrogees_)}
+                   "score_percent": (score * 100) // len(interrogees_),
+                   "total_api_calls": rate_limiter.total_call_count}
 
     for key, value in update_data.items():
         update_query = Query.update(runs).set(key, value).where(runs.id == run_id)

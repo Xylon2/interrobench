@@ -2,8 +2,11 @@ import time
 import sys
 import shutil
 import textwrap
+from typing import Callable
 from anthropic import InternalServerError
 from google.api_core.exceptions import ResourceExhausted
+from groq import RateLimitError
+from httpx import ReadTimeout
 
 class AbortException(Exception):
     """Custom exception for user aborting the operation."""
@@ -73,23 +76,43 @@ class AccumulatingPrinter:
         """
         return self.megastring
 
-def llm_w_backoff(llm, messages):
-    try:
-        return llm.invoke(messages)
+class LLMRateLimiter:
+    def __init__(self, rate_limit_seconds: int):
+        """
+        Initialize the RateLimiter.
 
-    except InternalServerError as e:
-        # anthropic raises these errors when "Overloaded"
-        print()
-        print(e)
-        print("\n### SYSTEM: backing off for 1 hour")
-        time.sleep(3600)
-        return llm.invoke(messages)
+        :param rate_limit_seconds: The initial number of seconds for the rate limit.
+        """
+        self.rate_limit_seconds = rate_limit_seconds
+        self.last_call_time = None
+        self.total_call_count = 0
 
-    except ResourceExhausted as e:
-        # Google's rate limits are stricter than any other provider, but they
-        # seem to reset quickly
-        print()
-        print(e)
-        print("\n### SYSTEM: backing off for 5 minutes")
-        time.sleep(300)
-        return llm.invoke(messages)
+    def __call__(self, llm: Callable, messages: list):
+        """
+        Call the LLM while enforcing the rate limit.
+        """
+
+        self.total_call_count += 1
+
+        current_time = time.time()
+        if self.last_call_time is not None:
+            elapsed_time = current_time - self.last_call_time
+            sleep_time = self.rate_limit_seconds - elapsed_time
+            if sleep_time > 0:
+                time.sleep(sleep_time)
+        
+        self.last_call_time = time.time()
+
+        try:
+            # Call the function
+            return llm.invoke(messages)
+        except (InternalServerError, ResourceExhausted, RateLimitError, ReadTimeout) as e:
+            print()
+            print(e)
+
+            self.rate_limit_seconds += 1
+            print(f"\n### SYSTEM: backing off for 5 minutes and increasing rate limit to {self.rate_limit_seconds} seconds")
+            time.sleep(300)
+
+            self.last_call_time = time.time()
+            return llm.invoke(messages)
