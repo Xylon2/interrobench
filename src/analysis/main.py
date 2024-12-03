@@ -1,3 +1,5 @@
+"""a messy script that can help with analysis"""
+
 import sys
 from functools import reduce
 from toolz.dicttoolz import update_in
@@ -8,6 +10,7 @@ import pandas as pd
 from scipy.cluster.hierarchy import linkage, dendrogram
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 import numpy as np
 
 import psycopg2
@@ -29,63 +32,9 @@ def load_config(filepath):
 
     return config
 
-def dendo(data):
-    bdata = {}
-
-    for model, details in data.items():
-        # Extract the boolean values and convert them to integers (1 or 0)
-        binary_vector = [1 if solved else 0 for _, solved in details['problems']]
-        # Assign the binary vector to the corresponding model in the new dictionary
-        bdata[model] = binary_vector
-
-    # Convert 't'/'f' to binary (1 for pass, 0 for fail).
-    binary_matrix = pd.DataFrame(bdata).T
-
-    # Perform hierarchical clustering
-    linkage_matrix = linkage(binary_matrix, method='ward')
-
-    # Plot the dendrogram
-    plt.figure(figsize=(12, 8))
-    dendrogram(linkage_matrix, labels=binary_matrix.index, leaf_rotation=90)
-    plt.title("Hierarchical Clustering of Students Based on Question Outcomes")
-    plt.xlabel("Student")
-    plt.ylabel("Distance")
-    plt.tight_layout()
-    plt.show()
-
-def clustering(bdata, questions):
-    binary_matrix = pd.DataFrame(
-    # Replace with your actual binary (0/1) data
-    [
-        [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
-        # Add rows for other students...
-    ],
-    index=["Student A"],  # Replace with actual student IDs
-    columns=questions
-)
-
-    # Define the number of clusters (this can be adjusted based on exploration)
-    num_clusters = 5
-
-    # Perform K-Means clustering
-    kmeans = KMeans(n_clusters=num_clusters, random_state=42)
-    question_clusters = kmeans.fit_predict(question_matrix.T)
-
-    # Add cluster labels to the questions
-    question_cluster_results = pd.DataFrame({
-        'Question': binary_matrix.index,
-        'Cluster': question_clusters
-    })
-
-    # Group questions by their cluster to identify patterns
-    clustered_questions = question_cluster_results.groupby('Cluster')['Question'].apply(list)
-
-    # Print each cluster with its questions
-    for cluster, questions_ in clustered_questions.items():
-        print(f"Cluster {cluster}:")
-        for question in questions_:
-            print(f"  - {question}")
-        print()
+valint = {"straight flush": 3, "win": 2, "lose": 1, "sweep": 0}
+valint_binary = {"straight flush": 0, "win": 2, "lose": 1, "sweep": 0}
+#valint_binary = {"straight flush": 1, "win": 1, "lose": 0, "sweep": 0}
 
 def main():
     # Arguments are a list of run ids
@@ -115,22 +64,26 @@ def main():
 
         # Get the results
 
-        # Construct the CASE expression for predominant_result
+        # Construct the CASE expression for detailed result categories
+        correct_count = fn.Count(
+            Case()
+            .when(attempts.result == 'true', 1)
+            .else_(None)
+        )
+
+        incorrect_count = fn.Count(
+            Case()
+            .when(attempts.result != 'true', 1)
+            .else_(None)
+        )
+
         predominant_result = (
             Case()
-            .when(
-                fn.Count(
-                    Case()
-                        .when(attempts.result == 'true', 1)
-                        .else_(None)
-                ) >= fn.Count(
-                    Case()
-                        .when(attempts.result != 'true', 1)
-                        .else_(None)
-                ),
-                True
-            )
-            .else_(False)
+            .when((correct_count == 3) & (incorrect_count == 0), 'straight flush')
+            .when((incorrect_count == 3) & (correct_count == 0), 'sweep')
+            .when(correct_count == 3, 'win')
+            .when(incorrect_count == 3, 'lose')
+            .else_('undecided')  # Catch-all
             .as_('predominant_result')
         )
 
@@ -150,10 +103,7 @@ def main():
         problems = cursor.fetchall()
 
         data[model_name] = {"total_score": final_score["numerator"],
-                            "problems": problems}
-
-        # TODO problems needs to hold the list of results as 0 and 1
-        
+                            "problems": problems}        
 
     #print(data)
     #print(data.keys())
@@ -162,16 +112,10 @@ def main():
         if v is None:
             v = 0
 
-        if result:
-            return v + 1
-        else:
-            return v
+        return v + valint[result]
 
     def rfn2(acc, problemattempt):
         problem_name, result = problemattempt
-        # if problem_name == "pythagorean theorem":
-        #     print(problem_name)
-        #     print("  ", result)
 
         return update_in(acc, [problem_name], lambda v: update_val(result, v))
 
@@ -191,17 +135,20 @@ def main():
 
         scores_per_problem = [xs[prob] for prob in problems_by_difficulty]
 
-        # Convert the boolean list to integers (True -> 1, False -> 0)
-        int_values = [1 if val else 0 for val in scores_per_problem]
+        # Convert the list to integers
+        int_values = [valint_binary[val] for val in scores_per_problem]
 
         # Create a figure and axis
         fig, ax = plt.subplots()
 
+        cmap = mcolors.ListedColormap(["white", "orange", "blue"])
+
         # Visualize as a bar code using a colormap
         ax.imshow(
             [int_values],  # Wrap in another list to make it a 2D array
-            cmap='Greys',  # Use a greyscale colormap
-            aspect='auto'  # Stretch to fill the axis
+            cmap=cmap,
+            #cmap="Greys",
+            aspect='auto'
         )
 
         # Remove the y-axis labels
@@ -213,6 +160,3 @@ def main():
 
         # Show the plot
         plt.show()
-
-        #dendo(data)
-        #clustering(bdata)
