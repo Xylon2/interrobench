@@ -125,3 +125,7 @@ linked attempts also:
 ```
 delete from runs where id = 13;
 ```
+
+## Analysis
+
+`pip install interrobench[analysis]`
