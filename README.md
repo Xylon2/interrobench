@@ -46,9 +46,18 @@ A `resources/config.yaml` should look like this (uncomment sections as appropria
 ```
 ---
 
-msg-limit: 30    # the number of requests the tool can use per attempt
-rate-limit: 5    # seconds between requests
-best-of: 5       # how many times is each function tested
+# can be "competition", "representative10", "easy3" or "hard3"
+problem-set: "competition"
+
+# attempts per question since these models are not deterministic
+attempts: 4
+
+# the number of requests the tool can use per attempt
+msg-limit: 30
+
+# seconds between requests
+rate-limit: 5
+
 model: {name: "claude-3-5-haiku-20241022", provider: "anthropic"}
 #model: {name: "gpt-4o-mini-2024-07-18", provider: "openai"}
 #model: {name: "grok-beta", provider: "xai"}
@@ -59,8 +68,6 @@ model: {name: "claude-3-5-haiku-20241022", provider: "anthropic"}
 debug:
 #  - pause-each-interrogation
 #  - pause-each-message
-#  - easy-problems-only
-#  - hard-problems-only
 ```
 
 And a `resources/credentials.yaml` containing your db credentials and API keys:

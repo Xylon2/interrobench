@@ -113,6 +113,7 @@ def interrogate_and_verify(config, llm_w_tool, llm_wo_tool, rate_limiter, cursor
 def rfn(config, llm, rate_limiter, cursor, run_id, acc, mystery_fn):
     name = mystery_fn["name"]
     function = mystery_fn["function"]
+    attempts = config["attempts"]
 
     prompt_continue(config, "pause-each-interrogation")
     print("\n######################################################")
@@ -122,26 +123,15 @@ def rfn(config, llm, rate_limiter, cursor, run_id, acc, mystery_fn):
     llm_wo_tool = llm
     llm_w_tool = llm.bind_tools([function])
 
-    required_wins = math.ceil(config["best-of"] / 2)
+    score = 0
 
-    scores = []
-    loop_index = 0
-    while not has_n_duplicates(required_wins, scores):
-        result = interrogate_and_verify(config, llm_w_tool, llm_wo_tool, rate_limiter, cursor, run_id, loop_index, mystery_fn)
+    for i in range(attempts):
+        result = interrogate_and_verify(config, llm_w_tool, llm_wo_tool, rate_limiter, cursor, run_id, i, mystery_fn)
         if result == True:
-            scores.append(True)
-        else:
-            scores.append(False)
+            score += 1
 
-        loop_index += 1
-
-    if most_common_element(scores):  # if more True than False
-        print("\n### SYSTEM: best of", config["best-of"], "passed after", len(scores), "attempts")
-        return acc + 1
-
-    else:
-        print("\n### SYSTEM: best of", config["best-of"], "failed after", len(scores), "attempts")
-        return acc
+    print("\n### SYSTEM: passed", score, "/", attempts, "attempts")
+    return acc + score
 
 def main():
     config_non_sensitive = load_config("resources/config.yaml")
@@ -194,21 +184,18 @@ def main():
             llm = ChatGroq(model=model["name"],
                            api_key=api_keys["groq"])
 
-    if "easy-problems-only" in config["debug"]:
-        print("SHORT_TEST")
-        interrogees_[:] = interrogees_[:3]
-
-    elif "hard-problems-only" in config["debug"]:
-        print("SHORT_TEST")
-        interrogees_[:] = interrogees_[-3:]
+    # fetch the configured subset of the problems
+    interrogees = list(filter(lambda d: config["problem-set"] in d.get("tags", set()), interrogees_))
 
     rate_limiter = LLMRateLimiter(rate_limit_seconds=config['rate-limit'])
 
-    score = reduce(lambda a, b: rfn(config, llm, rate_limiter, cursor, run_id, a, b), interrogees_, 0)
+    score = reduce(lambda a, b: rfn(config, llm, rate_limiter, cursor, run_id, a, b), interrogees, 0)
 
-    print("\n### SYSTEM: run complete for model `" + model["name"] + "`. Best of", config["best-of"])
-    print("Final score:", score, "/", len(interrogees_))
-    print("Percent:", (score * 100) // len(interrogees_))
+    percent = (score * 100) // (len(interrogees) * config["attempts"])
+
+    print("\n### SYSTEM: run complete for model `" + model["name"] + "`.")
+    print("Final score:", score, "/", len(interrogees) * config["attempts"])
+    print("Percent:", percent)
     print("Wrong answers:")
 
     attempts = Table("attempts")
@@ -227,8 +214,8 @@ def main():
     print_aligned_tuples(wrong_list)
 
     update_data = {"total_run_time": (datetime.now() - start_time).total_seconds(),
-                   "final_score": json.dumps({"numerator": score, "denominator": len(interrogees_)}),
-                   "score_percent": (score * 100) // len(interrogees_),
+                   "final_score": json.dumps({"numerator": score, "denominator": len(interrogees) * config["attempts"]}),
+                   "score_percent": percent,
                    "total_api_calls": rate_limiter.total_call_count}
 
     for key, value in update_data.items():
