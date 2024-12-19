@@ -4,6 +4,7 @@ Each also has a set of verifications which the system will use to check the LLM 
 """
 
 from string import ascii_lowercase
+import math
 import statistics
 from langchain.tools import tool
 from toolz.dicttoolz import update_in
@@ -36,9 +37,9 @@ def find_higher(a: int, b: int) -> int:
     return max(a, b)
 
 interrogees.append({"name": "find higher number",
-                   "function": find_higher,
-                   "verifications": [[10, 5], [3, 8], [-2, -5], [7, 7]],
-                   "tags": {"competition", "representative10", "easy3"}})
+                    "function": find_higher,
+                    "verifications": [[10, 5], [3, 8], [-2, -5], [7, 7]],
+                    "tags": {"competition", "representative10", "easy3"}})
 
 @tool("test_function")
 def pythagorean(a: int, b: int) -> float:
@@ -46,9 +47,9 @@ def pythagorean(a: int, b: int) -> float:
     return (a * a + b * b) ** 0.5
 
 interrogees.append({"name": "pythagorean theorem",
-                   "function": pythagorean,
-                   "verifications": [[3, 4], [5, 12], [8, 15]],
-                   "tags": {"competition", "representative10"}})
+                    "function": pythagorean,
+                    "verifications": [[3, 4], [5, 12], [8, 15]],
+                    "tags": {"competition", "representative10"}})
 
 @tool("test_function")
 def float_division(a: int, b: int) -> str | float:
@@ -66,9 +67,9 @@ def triangle_third_angle(a: int, b: int) -> int:
     return 180 - a - b
 
 interrogees.append({"name": "triangle third angle",
-                   "function": triangle_third_angle,
-                   "verifications": [[60, 60], [45, 45], [30, 60], [90, 45], [120, 30]],
-                   "tags": {"competition", "representative10"}})
+                    "function": triangle_third_angle,
+                    "verifications": [[60, 60], [45, 55], [120, 30]],
+                    "tags": {"competition", "representative10"}})
 
 @tool("test_function")
 def divide_by_4(a: int) -> float:
@@ -76,9 +77,9 @@ def divide_by_4(a: int) -> float:
     return a / 4
 
 interrogees.append({"name": "divide by 4",
-                   "function": divide_by_4,
-                   "verifications": [[4], [8], [1], [16]],
-                   "tags": {"competition"}})
+                    "function": divide_by_4,
+                    "verifications": [[8], [16], [44]],
+                    "tags": {"competition"}})
 
 @tool("test_function")
 def remainder(a: int, b: int) -> str | int:
@@ -88,7 +89,7 @@ def remainder(a: int, b: int) -> str | int:
 interrogees.append({"name": "remainder",
                     "function": remainder,
                     "verifications": [[3, 2], [45, 16], [13, 13]],
-                   "tags": {"competition"}})
+                    "tags": {"competition"}})
 
 @tool("test_function")
 def median(a: int, b: int, c: int, d: int, e: int) -> int:
@@ -98,17 +99,17 @@ def median(a: int, b: int, c: int, d: int, e: int) -> int:
 interrogees.append({"name": "median of 5",
                     "function": median,
                     "verifications": [[1, 2, 3, 4, 5], [40, 15, 60, 3, 13], [0, 0, 0, 4, 400]],
-                   "tags": {"competition"}})
+                    "tags": {"competition"}})
 
 @tool("test_function")
 def circle_circumference(a: int) -> float:
     """Use this tool to test the mystery function."""
-    return 2 * 3.14159 * a
+    return 2 * math.pi * a
 
 interrogees.append({"name": "circle circumference",
-                   "function": circle_circumference,
-                   "verifications": [[1], [5], [10], [0], [100]],
-                   "tags": {"competition", "representative10"}})
+                    "function": circle_circumference,
+                    "verifications": [[1], [5], [7]],
+                    "tags": {"competition", "representative10"}})
 
 @tool("test_function")
 def is_prime(a: int) -> bool:
@@ -121,9 +122,9 @@ def is_prime(a: int) -> bool:
     return True
 
 interrogees.append({"name": "is prime",
-                   "function": is_prime,
-                   "verifications": [[2], [7], [4], [1], [13], [25]],
-                   "tags": {"competition", "representative10"}})
+                    "function": is_prime,
+                    "verifications": [[2], [7], [4], [1], [13], [25]],
+                    "tags": {"competition", "representative10"}})
 
 @tool("test_function")
 def concatenate_numbers(a: int, b: int, c: int) -> int:
@@ -131,9 +132,9 @@ def concatenate_numbers(a: int, b: int, c: int) -> int:
     return int(str(abs(a)) + str(abs(b)) + str(abs(c)))
 
 interrogees.append({"name": "concatenate numbers",
-                   "function": concatenate_numbers,
-                   "verifications": [[1, 2, 3], [5, 10, 15], [42, 0, 7]],
-                   "tags": {"competition"}})
+                    "function": concatenate_numbers,
+                    "verifications": [[1, 2, 3], [5, 10, 15], [42, 0, 7]],
+                    "tags": {"competition"}})
 
 @tool("test_function")
 def ignore_one(a: int, b: int, c: int) -> int:
@@ -143,7 +144,7 @@ def ignore_one(a: int, b: int, c: int) -> int:
 interrogees.append({"name": "ignore one argument",
                     "function": ignore_one,
                     "verifications": [[3, 2, 9], [4, 5, 2], [0, 9, 3]],
-                   "tags": {"competition", "representative10"}})
+                    "tags": {"competition", "representative10"}})
 
 @tool("test_function")
 def closest_pair_difference(a: int, b: int, c: int) -> int:
@@ -152,9 +153,9 @@ def closest_pair_difference(a: int, b: int, c: int) -> int:
     return min(diffs)
 
 interrogees.append({"name": "difference of closest pair",
-                   "function": closest_pair_difference,
-                   "verifications": [[1, 5, 8], [10, 11, 15], [0, 7, 2], [4, 4, 8]],
-                   "tags": {"competition", "representative10", "hard3"}})
+                    "function": closest_pair_difference,
+                    "verifications": [[1, 5, 8], [10, 11, 15], [0, 7, 2], [4, 4, 8]],
+                    "tags": {"competition", "representative10", "hard3"}})
 
 @tool("test_function")
 def subtract_and_divide(a: int, b: int, c: int) -> str:
@@ -164,7 +165,7 @@ def subtract_and_divide(a: int, b: int, c: int) -> str:
 interrogees.append({"name": "subtract and divide",
                     "function": subtract_and_divide,
                     "verifications": [[10, 2, 2], [35, 16, 4], [13, 3, 5]],
-                   "tags": {"competition", "hard3"}})
+                    "tags": {"competition", "hard3"}})
 
 @tool("test_function")
 def times_3_round_5(a: int) -> int:
@@ -172,9 +173,9 @@ def times_3_round_5(a: int) -> int:
     return round(a * 3 / 5) * 5
 
 interrogees.append({"name": "times 3 round to nearest 5",
-                   "function": times_3_round_5,
-                   "verifications": [[10], [7], [3], [0], [15], [-4]],
-                   "tags": {"competition", "hard3"}})
+                    "function": times_3_round_5,
+                    "verifications": [[10], [7], [3], [0], [15], [-4]],
+                    "tags": {"competition", "hard3"}})
 
 @tool("test_function")
 def greatest_common_factor(a: int, b: int) -> int:
@@ -184,9 +185,9 @@ def greatest_common_factor(a: int, b: int) -> int:
     return abs(a)
 
 interrogees.append({"name": "greatest common factor",
-                   "function": greatest_common_factor,
-                   "verifications": [[12, 18], [54, 24], [7, 13], [100, 25]],
-                   "tags": {"competition", "representative10"}})
+                    "function": greatest_common_factor,
+                    "verifications": [[12, 18], [54, 24], [7, 13], [100, 25]],
+                    "tags": {"competition", "representative10"}})
 
 @tool("test_function")
 def modulus_3_as_string(a: int) -> str:
@@ -195,9 +196,9 @@ def modulus_3_as_string(a: int) -> str:
     return fruits[a % 3]
 
 interrogees.append({"name": "modulus 3 as string",
-                   "function": modulus_3_as_string,
-                   "verifications": [[7], [5], [0], [15]],
-                   "tags": {"competition", "representative10"}})
+                    "function": modulus_3_as_string,
+                    "verifications": [[7], [5], [0], [15]],
+                    "tags": {"competition", "representative10"}})
 
 @tool("test_function")
 def set_heading(a: int, b: int) -> str:
